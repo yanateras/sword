@@ -2,29 +2,22 @@
 # encoding: utf-8
 
 module Sword
-  require 'sinatra/base'
   require 'optparse'
-  require 'yaml'
+  require File.absolute_path File.dirname(__FILE__) + '/../lib/constants'
 
-  $library = File.absolute_path(File.dirname(__FILE__) + '/../lib')
-  $settings = YAML.load_file "#{$library}/settings.yml"
-  
-  @required = Dir.home + '/.sword'
-  @list = File.read(@required).split("\n") if File.exists?(@required)
-
-  $:.unshift $library
   OptionParser.new do |o|
     o.summary_width = 17
-    o.on('-b', '--build', 'Build current project into .zip') { require 'build' }
+    o.on('-b', '--build', 'Build current project into .zip') { require LIBRARY + '/build' }
     o.on('--debug', 'Run server noisily') { $debug = true }
     o.on('-d', '--dir <name>', 'Specify project directory') { |d| $directory = d }
-    o.on('-g', '--gem <name>', 'Add a gem to require') { |g| open(@required, 'a') { |f| f.puts g }
+    o.on('-g', '--gem <name>', 'Add a gem to require') { |g| open(REQUIRED, 'a') { |f| f.puts g }
       puts "`#{g}` will be loaded next time you run Sword."; exit }
     o.on('-h', '--help', 'Print this message') { puts o; exit }
+    o.on('-i', '--install', 'Install must-have gems') { exec 'gem install ' + SETTINGS[:gems].map { |n| n.respond_to?(:first) ? n.last : n } * ' '; exit }
     o.on('-p', '--port <num>', 'Change the port (1111 by default)') { |p| $port = p }
-    o.on('-v', '--version', 'Print Sword’s version') { puts 'Sword ' + $settings[:version]; exit }
+    o.on('-v', '--version', 'Print Sword’s version') { puts 'Sword ' + VERSION; exit }
   end.parse!
 
-  require 'application'
+  require LIBRARY + '/application'
   Application.run!
 end
