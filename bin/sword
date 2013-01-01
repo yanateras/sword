@@ -3,7 +3,8 @@
 
 module Sword
   require 'optparse'
-  require File.absolute_path File.dirname(__FILE__) + '/../lib/constants'
+  require 'pathname'
+  require Pathname.new(__FILE__).dirname.realpath.to_s + '/../lib/constants'
 
   OptionParser.new do |o|
     o.summary_width = 17
