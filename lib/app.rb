@@ -21,7 +21,7 @@ class Sword < Sinatra::Base
   error { send_file "#{dir}/../error.html" }
   get('/favicon.ico') { send_file "#{dir}/../favicon.ico" }
 
-  def self.version; "0.1.0" end
+  def self.version; "0.1.1" end
   set :views, '.'
   set :public_folder, settings.views
   set :port, 1111
