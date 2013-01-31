@@ -2,6 +2,7 @@ require 'sinatra/base'
 require 'psych'
 
 class Sword < Sinatra::Base
+  def self.version; "0.1.2" end
   dir = File.dirname(__FILE__)
   engine = Psych.load_file "#{dir}/engine.yml"
   # Hook-up all gems that we will
@@ -21,7 +22,6 @@ class Sword < Sinatra::Base
   error { send_file "#{dir}/../error.html" }
   get('/favicon.ico') { send_file "#{dir}/../favicon.ico" }
 
-  def self.version; "0.1.1" end
   set :views, '.'
   set :public_folder, settings.views
   set :port, 1111
@@ -31,7 +31,7 @@ class Sword < Sinatra::Base
     return send_file "#{style}.css" if File.exists? "#{style}.css"
     engine['styles'].each do |k,v| v.each do |e| # for extension
       return send k, style.to_sym, Compass.sass_engine_options
-        .merge(line_comments: false) if File.exists? "#{style}.#{e}"
+        .merge(line_comments: false, cache: false) if File.exists? "#{style}.#{e}"
     end; end
   end
 
@@ -44,7 +44,7 @@ class Sword < Sinatra::Base
   end
 
   get '/' do
-    call env.merge('PATH_INFO' => '/index')
+    call env.merge('PATH_INFO' => "/index")
   end
 
   get '/*/?' do |page|
@@ -54,8 +54,10 @@ class Sword < Sinatra::Base
       return send_file "#{page}.#{e}" if File.exists? "#{page}.#{e}"
     end
     engine['pages'].each do |k,v| v.each do |e| # for extension
-      return send k, page.to_sym if File.exists? "#{page}.#{e}"
+      return send k, page.to_sym, pretty: true if File.exists? "#{page}.#{e}"
     end; end
-    raise "Page doesn't exist"
+    # Is it an index? Call it recursively.
+    raise "No file found" if page =~ /index/
+    call env.merge('PATH_INFO' => "/#{page}/index") 
   end
 end
