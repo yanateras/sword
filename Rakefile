@@ -1,8 +1,3 @@
-require 'bundler/setup'
-Bundler.require :default
-require 'sinatra_static'
-require 'sinatra/advanced_routes'
-
 task default: [:run]
 
 task :gem do
@@ -18,11 +13,10 @@ task :update do
 end
 
 task :run do
-  ruby 'app.rb'
+  `./bin/sword`
 end
 
 task :build do
-  require 'rack/test'
   task :run
   builder = SinatraStatic.new(Pony)
   builder.build!('build')

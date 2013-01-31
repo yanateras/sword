@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.files = `git ls-files`.split("\n")
   s.executables = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
-  # s.require_paths = %w[lib]
+  s.require_paths = %w[lib]
   s.authors = %w[George ソム]
   s.date = Date.today.to_s
   s.email = 'somu@so.mu'
@@ -30,6 +30,9 @@ Gem::Specification.new do |s|
   s.summary = "Develop using SASS/Compass, Slim, LESS &c. and convert it to static."
 
   %w[
+    bundler 1.2.3
+    rake 10.0.3
+
     sinatra 1.3.2
     sinatra-static 0.1.1
     sinatra-advanced-routes 0.5.1
@@ -41,8 +44,6 @@ Gem::Specification.new do |s|
 
     thin 1.5.0
     rack-test 0.6.2
-    bundler 1.2.3
-    rake 10.0.3
   ].each_slice(2) do |n, v|
     s.add_dependency(n, [] << "~> #{v}")
   end
