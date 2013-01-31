@@ -19,28 +19,35 @@ class Sword < Sinatra::Base
   end
 
   disable :show_exceptions
-  error { send_file "#{dir}/../error.html" }
-  get('/favicon.ico') { send_file "#{dir}/../favicon.ico" }
+
+  error do
+    @error = env['sinatra.error']
+    erb :error, views: "#{dir}/../"
+  end
+
+  get '/favicon.ico' do
+    send_file "#{dir}/../favicon.ico"
+  end
 
   set :views, '.'
   set :public_folder, settings.views
   set :port, 1111
 
   get '/*.css' do |style|
-    content_type 'text/css', charset: 'utf-8'
     return send_file "#{style}.css" if File.exists? "#{style}.css"
     engine['styles'].each do |k,v| v.each do |e| # for extension
       return send k, style.to_sym, Compass.sass_engine_options
         .merge(line_comments: false, cache: false) if File.exists? "#{style}.#{e}"
     end; end
+    raise "Stylesheet not found"
   end
 
   get '/*.js' do |script|
-    content_type 'application/x-javascript', charset: 'utf-8'
     return send_file "#{script}.js" if File.exists? "#{script}.js"
     engine['scripts'].each do |k,v| v.each do |e| # for extension
       return send k, script.to_sym if File.exists? "#{script}.#{e}"
     end; end
+    raise "Script not found"
   end
 
   get '/' do
@@ -57,7 +64,7 @@ class Sword < Sinatra::Base
       return send k, page.to_sym, pretty: true if File.exists? "#{page}.#{e}"
     end; end
     # Is it an index? Call it recursively.
-    raise "No file found" if page =~ /index/
+    raise "Page not found" if page =~ /index/
     call env.merge('PATH_INFO' => "/#{page}/index") 
   end
 end
