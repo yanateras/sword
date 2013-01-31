@@ -1,0 +1,17 @@
+pages:
+  haml: [haml]
+  erb: [erb, rhtml, erubis]
+  liquid: [liquid]
+  textile: [textile]
+  markdown: [markdown, mkd, md]
+  markaby: [mab]
+  rdoc: [rdoc]
+  slim: [slim]
+
+styles:
+  sass: [sass]
+  scss: [scss]
+  less: [less]
+
+scripts:
+  coffee: [coffee]
