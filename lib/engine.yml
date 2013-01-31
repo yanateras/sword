@@ -15,3 +15,25 @@ styles:
 
 scripts:
   coffee: [coffee]
+
+gems:
+  - haml
+  - erb
+  - compass
+  - susy
+  - sass
+  - less
+  - liquid
+  - redcloth
+  - rdoc/markup
+  - slim
+  - markaby
+  - creole
+  - coffee-script
+
+markdown:
+  - redcarpet
+  - rdiscount
+  - bluecloth
+  - kramdown
+  - maruku

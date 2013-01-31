@@ -1,19 +1,18 @@
 require 'sinatra/base'
+require 'psych'
 
 class Sword < Sinatra::Base
-  require 'psych'
-  engines = Psych.load_file File.dirname(__FILE__) + '/engines.yml'
-
-  %w[haml erb compass susy
-  sass less liquid redcloth rdoc/markup slim
-  markaby creole coffee-script].each do |g|
+  engine = Psych.load_file File.dirname(__FILE__) + '/engine.yml'
+  # Hook-up all gems that we will
+  # probably need; open an issue
+  # if this list is missing smth.
+  engine['gems'].each do |g|
     begin require g
     rescue LoadError; next end
   end
 
-  %w[redcarpet rdiscount bluecloth
-  kramdown maruku].each do |g|
-    begin require g; break
+  engine['markdown'].each do |m|
+    begin require m; break
     rescue LoadError; next end
   end
 
@@ -29,7 +28,7 @@ class Sword < Sinatra::Base
   get '/*.css' do |style|
     content_type 'text/css', charset: 'utf-8'
     return send_file "#{style}.css" if File.exists? "#{style}.css"
-    engines['styles'].each do |k,v| v.each do |e| # for extension
+    engine['styles'].each do |k,v| v.each do |e| # for extension
       return send k, style.to_sym, Compass.sass_engine_options
         .merge(line_comments: false) if File.exists? "#{style}.#{e}"
     end; end
@@ -38,19 +37,22 @@ class Sword < Sinatra::Base
   get '/*.js' do |script|
     content_type 'application/x-javascript', charset: 'utf-8'
     return send_file "#{script}.js" if File.exists? "#{script}.js"
-    engines['scripts'].each do |k,v| v.each do |e| # for extension
+    engine['scripts'].each do |k,v| v.each do |e| # for extension
       return send k, script.to_sym if File.exists? "#{script}.#{e}"
     end; end
   end
 
   get '/' do
-    redirect '/index'
+    call env.merge('PATH_INFO' => '/index')
   end
 
   get '/*/?' do |page|
-    return send_file "#{page}.html" if File.exists? "#{page}.html"
-    return send_file "#{page}.htm" if File.exists? "#{page}.htm"
-    engines['pages'].each do |k,v| v.each do |e| # for extension
+    %w[html htm].each do |e|
+      # This is specially for dumbasses who use .htm extension
+      # If you know another ultra-dumbass html extension, let me know.
+      return send_file "#{page}.#{e}" if File.exists? "#{page}.#{e}"
+    end
+    engine['pages'].each do |k,v| v.each do |e| # for extension
       return send k, page.to_sym if File.exists? "#{page}.#{e}"
     end; end
     raise "Page doesn't exist"
