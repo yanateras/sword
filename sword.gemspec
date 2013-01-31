@@ -1,22 +1,9 @@
 # encoding: utf-8
-
-version = `gem list sword -r`[/(?<=\().+(?=\))/] #=> (0.1.5)
-  .split('.')
-  .map { |v| v.to_i }
-version[2] += 1
-
-if version[2] >= 10 
-  version[1] += 1
-  version[2] = 0
-end
-
-if version[1] >= 10 
-  version[0] += 1
-  version[1] = 0
-end
+require './lib/app'
 
 Gem::Specification.new do |s|
   s.name = 'sword'
+  s.version = Sword.version
   s.platform = Gem::Platform::RUBY
   s.files = `git ls-files`.split("\n")
   s.executables = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
