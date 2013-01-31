@@ -2,7 +2,8 @@ require 'sinatra/base'
 require 'psych'
 
 class Sword < Sinatra::Base
-  engine = Psych.load_file File.dirname(__FILE__) + '/engine.yml'
+  dir = File.dirname(__FILE__)
+  engine = Psych.load_file "#{dir}/engine.yml"
   # Hook-up all gems that we will
   # probably need; open an issue
   # if this list is missing smth.
@@ -16,14 +17,14 @@ class Sword < Sinatra::Base
     rescue LoadError; next end
   end
 
+  disable :show_exceptions
+  error { send_file "#{dir}/../error.html" }
+  get('/favicon.ico') { send_file "#{dir}/../favicon.ico" }
+
   def self.version; "0.1.0" end
   set :views, '.'
   set :public_folder, settings.views
   set :port, 1111
-
-  get '/favicon.ico' do
-    send_file File.dirname(__FILE__) + "/../favicon.ico"
-  end
 
   get '/*.css' do |style|
     content_type 'text/css', charset: 'utf-8'
