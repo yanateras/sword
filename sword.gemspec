@@ -16,22 +16,11 @@ Gem::Specification.new do |s|
   s.description = "Design development unabridged."
   s.summary = "Develop using SASS/Compass, Slim, LESS &c. and convert it to static."
 
-  %w[
-    bundler 1.2.3
-    rake 10.0.3
-
-    sinatra 1.3.2
-    sinatra-static 0.1.1
-    sinatra-advanced-routes 0.5.1
-
-    compass 0.12.2
-    slim 1.3.6
-    less 2.2.2
-    therubyracer 0.10.2
-
-    thin 1.5.0
-    rack-test 0.6.2
-  ].each_slice(2) do |n, v|
-    s.add_dependency(n, [] << "~> #{v}")
+  %w[psych 1.3.4 sinatra 1.3.4 thin 1.5.0].each_slice(2) do |n, v|
+    s.add_runtime_dependency(n, [] << "~> #{v}")
+  end
+  
+  %w[bundler 1.2.3 rake 10.0.3].each_slice(2) do |n, v|
+    s.add_development_dependency(n, [] << "~> #{v}")
   end
 end
