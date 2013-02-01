@@ -1,6 +1,23 @@
 #!/usr/bin/env ruby
-dir = File.dirname(__FILE__)
-require "#{dir}/../lib/app"
-require "#{dir}/../lib/talk"
+require 'psych'
+
+dir = File.dirname(__FILE__) + '/../lib'
+$engine = Psych.load_file "#{dir}/engine.yml"
+
+# Hook-up all gems that we will
+# probably need; open an issue
+# if this list is missing smth.
+$engine['gems'].each do |g|
+  begin require g
+  rescue LoadError; next end
+end
+
+$engine['markdown'].each do |m|
+  begin require m; break
+  rescue LoadError; next end
+end
+
+require "#{dir}/app"
+require "#{dir}/talk"
 
 (Talk.build if ARGV[0] == 'build') || Talk.run

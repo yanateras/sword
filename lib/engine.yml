@@ -20,6 +20,7 @@ gems:
   - haml
   - erb
   - compass
+  - rgbapng
   - susy
   - sass
   - less
