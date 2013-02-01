@@ -1,30 +1,25 @@
-class Sword; class << self
-  def run!(options={})
-    set options
-    handler = detect_rack_handler
-    handler_name = handler.name.gsub(/.*::/, '')
-    server_settings = settings.respond_to?(:server_settings) ? settings.server_settings : {}
-    handler.run self, server_settings.merge(Port: port, Host: bind) do |server|
-      $stderr.puts ">> Sword #{Sword.version} at your service!\n" +
-      "   http://localhost:#{port} to see your project.\n" +
-      "   CTRL+C to stop."
-      [:INT, :TERM].each { |sig| trap(sig) { quit!(server, handler_name) } }
-      server.silent = true if server.respond_to? :silent
-      server.threaded = settings.threaded if server.respond_to? :threaded=
-      set :running, true
-      yield server if block_given?
-    end
-  rescue Errno::EADDRINUSE, RuntimeError
-    $stderr.puts "!! Another instance of Sword is running.\n"
-  end
-
-  def quit!(server, handler_name)
-    server.respond_to?(:stop!) ? server.stop! : server.stop
-    $stderr.print "\n"
-  end
-end; end
-
 class Talk; class << self
+  def version; '0.4.2' end
   def build; end
-  def run; Sword.run!; end
+  def run
+    require "#{$dir}/app"
+    Sword.run!
+  end
+  def help
+    puts "Usage: sword [<gem>/build/h/v]",
+    "Require a gem: `sword <gemname>`",
+    "Build your project: `sword build`"
+  end
+  def gem names
+    $engine['gems'] |= names
+    puts "Next time you run Sword,"
+    puts names[1].nil? ? 
+      "`#{names[0]}` gem will be avaliable." :
+      "`#{names * '`, `'}` gems will be avaliable."
+    File.write "#{$dir}/engine.yml",
+      Psych.dump($engine)
+  end
+  # Aliases
+  def h; self.help; end
+  def v; puts "Sword #{self.version}" end
 end; end

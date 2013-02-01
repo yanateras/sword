@@ -1,7 +1,6 @@
 output_style = :nested
 line_comments = false
 relative_assets = true
-asset_cache_buster :none
 cache = false
 
 sass_dir = '.'
