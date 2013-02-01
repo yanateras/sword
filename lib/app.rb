@@ -2,7 +2,7 @@ require 'sinatra/base'
 require 'psych'
 
 class Sword < Sinatra::Base
-  def self.version; "0.1.2" end
+  def self.version; "0.2.0" end
   dir = File.dirname(__FILE__)
   engine = Psych.load_file "#{dir}/engine.yml"
   # Hook-up all gems that we will
