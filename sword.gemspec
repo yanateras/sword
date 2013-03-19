@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.files = `git ls-files`.split("\n")
   s.executables = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   # s.require_paths = %w[lib]
-  s.authors = ['George ソム']
+  s.authors = ['George']
   s.date = Date.today.to_s
   s.email = 'somu@so.mu'
   s.homepage = 'http://github.com/somu/sword'

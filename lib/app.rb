@@ -27,6 +27,7 @@ class Sword < Sinatra::Base
   # Structure-agnostic:
   set :views, '.'
   set :public_folder, settings.views
+  set :markdown, layout_engine: :slim # Do it better next time
 
   error do
     @error = env['sinatra.error']

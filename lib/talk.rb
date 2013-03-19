@@ -1,6 +1,9 @@
 class Talk; class << self
   def version; '0.4.2' end
-  def build; end
+  def build
+    require "#{$dir}/build"
+    Build.run!
+  end
   def run
     require "#{$dir}/app"
     Sword.run!
