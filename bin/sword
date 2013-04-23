@@ -1,9 +1,21 @@
 #!/usr/bin/env ruby
-require 'psych'
 
-$dir = File.dirname(__FILE__) + '/../lib'
-$engine = Psych.load_file "#{$dir}/engine.yml"
+module Sword; class Interface; class << self
+  def version; puts "Sword #{Sword.version}" end
+  alias v version
+  
+  def build
+    require "./build"
+    Build.run!
+  end
+  def run
+    Sword.run!
+  end
+  def help
+    puts "Usage: sword [<gem>/build/version]",
+    "Require a gem: `sword <gemname>`",
+    "Build your project: `sword build`"
+  end
+end end end
 
-require "#{$dir}/talk"
-begin ARGV[0].nil? ? Talk.run : Talk.send(ARGV[0].gsub('-', ''))
-rescue NoMethodError, ArgumentError; Talk.gem ARGV end
+ARGV[0].nil? ? Sword::Application.run : Sword::Interface.send(ARGV[0].gsub '-', '')
