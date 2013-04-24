@@ -5,23 +5,25 @@ module Sword
   require 'optparse'
   require 'yaml'
 
-  @options, @required = {}, Dir.home + '/.sword'
-  @library = File.dirname(__FILE__) + '/../lib'
-  @settings = YAML.load_file "#{@directory}/settings.yml"
-  @list = File.exists?(@required) ? File.read(@required).split("\n") : []
+  $library = File.absolute_path(File.dirname(__FILE__) + '/../lib')
+  $settings = YAML.load_file "#{$library}/settings.yml"
+  
+  @required = Dir.home + '/.sword'
+  @list = File.read(@required).split("\n") if File.exists?(@required)
 
+  $:.unshift $library
   OptionParser.new do |o|
     o.summary_width = 17
-    o.on('-b', '--build', 'Build current project into .zip') {  }
-    o.on('-d', '--dir <name>', 'Specify project directory') { |d| @directory = d }
-    o.on('--debug', 'Run server noisily') { @options[:debug] = true }
-    o.on('-h', '--help', 'Print this message') { puts o; exit }
-    o.on('-g', '--gem <name>', 'Add a gem to require') { |g| open(@required, 'a') { |f| f.puts g };
+    o.on('-b', '--build', 'Build current project into .zip') { require 'build' }
+    o.on('--debug', 'Run server noisily') { $debug = true }
+    o.on('-d', '--dir <name>', 'Specify project directory') { |d| $directory = d }
+    o.on('-g', '--gem <name>', 'Add a gem to require') { |g| open(@required, 'a') { |f| f.puts g }
       puts "`#{g}` will be loaded next time you run Sword."; exit }
-    o.on('-v', '--version', 'Print Sword’s version') { puts "Sword #{@settings[:version]}"; exit }
+    o.on('-h', '--help', 'Print this message') { puts o; exit }
+    o.on('-p', '--port <num>', 'Change the port (1111 by default)') { |p| $port = p }
+    o.on('-v', '--version', 'Print Sword’s version') { puts 'Sword ' + $settings[:version]; exit }
   end.parse!
 
-  $:.unshift @library
   require 'application'
   Application.run!
 end

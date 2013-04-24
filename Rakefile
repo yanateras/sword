@@ -1,4 +1,5 @@
-task default: [:gem]
+task :default do
+end
 
 task :gem do
   `gem build sword.gemspec`

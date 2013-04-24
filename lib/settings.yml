@@ -1,46 +1,46 @@
-:version: 0.5.0
+:version: 0.6.0
 
-# pages:
-# - haml
-# - liquid
-# - textile
-# - rdoc
-# - slim
-#   markaby: mab
-#   markdown: 
-#   - markdown
-#   - mkd
-#   - md
-#   erb:
-#   - erb
-#   - rhtml
-#   - erubis
+:gems:
+- haml
+- erb
+- compass
+- sass
+- less
+- liquid
+- redcloth
+- rdoc/markup
+- slim
+- markaby
+- creole
+- coffee-script
+- markdown:
+  - redcarpet
+  - rdiscount
+  - bluecloth
+  - kramdown
+  - maruku
 
-# styles:
-# - sass
-# - scss
-# - less
+pages:
+- haml
+- liquid
+- textile
+- rdoc
+- slim
+- markaby:
+  - mab
+- markdown:
+  - markdown
+  - mkd
+  - md
+- erb:
+  - erb
+  - rhtml
+  - erubis
 
-# scripts:
-# - coffee
+styles:
+- sass
+- scss
+- less
 
-# gems:
-# - haml
-# - erb
-# - compass
-# - susy
-# - sass
-# - less
-# - liquid
-# - redcloth
-# - rdoc/markup
-# - slim
-# - markaby
-# - creole
-# - coffee-script
-#   markdown:
-#   - redcarpet
-#   - rdiscount
-#   - bluecloth
-#   - kramdown
-#   - maruku
+scripts:
+- coffee
