@@ -1,15 +1,10 @@
 module Sword
-  require 'sinatra/base'
-  require 'psych'
-
-  @settings = Psych.load_file './settings.yml'
-  @settings[:gems].each do |g|
+  @settings[:gems].merge(@list).each do |g|
     begin require g
     rescue LoadError; next end
   end
 
   class Application < Sinatra::Base
-    def version; @settings[:version] end
     # This piece of code is from Sinatra,
     # tweaked a bit to silent Thin server
     # and add Sword version and &c.
@@ -19,22 +14,20 @@ module Sword
       # if this list is missing smth.
       set options
       handler = detect_rack_handler
-      handler_name = handler.name.gsub(/.*::/, '')
       server_settings = settings.respond_to?(:server_settings) ? settings.server_settings : {}
-      handler.run self, server_settings.merge(Port: port, Host: bind) do |server|
+      handler.run self, server_settings.merge(Port: 1111, Host: bind) do |server|
         $stderr.puts ">> Sword #{@settings[:version]} at your service!",
         "   http://localhost:#{port} to see your project.",
         "   CTRL+C to stop."
         [:INT, :TERM].each { |s| trap(s) { quit!(server, handler_name) } }
-        server.silent = true
         server.threaded = settings.threaded
+        server.silent = true unless @options[:debug]
         set :running, true
         yield server if block_given?
       end
     rescue Errno::EADDRINUSE, RuntimeError
       $stderr.puts "!! Another instance of Sword is running.\n"
     end
-
     def quit! server, handler_name
       server.stop!
       $stderr.print "\n"
@@ -46,13 +39,12 @@ module Sword
     sassy = Compass.sass_engine_options
 
     disable :show_exceptions # show `error.erb`
-    set :port, 1111 # at localhost:1111
-    set :views, '.' # Structure-agnostic
+    set :views, @directory # Structure-agnostic
     set :public_folder, settings.views
 
     error do
       @error = env['sinatra.error']
-      erb :error, :views => '.'
+      erb :error, :views => @directory
     end
 
     get '/favicon.ico' do
@@ -66,7 +58,7 @@ module Sword
         return send k, style.to_sym, sassy if File.exists? "#{style}.#{e}"
       end end
       # If none, then raise an exception.
-      raise "Stylesheet not found"
+      raise 'Stylesheet not found'
     end
 
     get '/*.js' do |script|
@@ -74,12 +66,12 @@ module Sword
       @settings[:scripts].each do |k,v| v.each do |e|
         return send k, script.to_sym if File.exists? "#{script}.#{e}"
       end end
-      raise "Script not found"
+      raise 'Script not found'
     end
 
     get '/' do
       # Call /index, the same shit
-      call env.merge('PATH_INFO' => "/index")
+      call env.merge 'PATH_INFO' => '/index'
     end
 
     get '/*/?' do |page|

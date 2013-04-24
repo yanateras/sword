@@ -1,21 +1,27 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
+module Sword
+  require 'sinatra/base'
+  require 'optparse'
+  require 'yaml'
 
-module Sword; class Interface; class << self
-  def version; puts "Sword #{Sword.version}" end
-  alias v version
-  
-  def build
-    require "./build"
-    Build.run!
-  end
-  def run
-    Sword.run!
-  end
-  def help
-    puts "Usage: sword [<gem>/build/version]",
-    "Require a gem: `sword <gemname>`",
-    "Build your project: `sword build`"
-  end
-end end end
+  @options, @required = {}, Dir.home + '/.sword'
+  @library = File.dirname(__FILE__) + '/../lib'
+  @settings = YAML.load_file "#{@directory}/settings.yml"
+  @list = File.exists?(@required) ? File.read(@required).split("\n") : []
 
-ARGV[0].nil? ? Sword::Application.run : Sword::Interface.send(ARGV[0].gsub '-', '')
+  OptionParser.new do |o|
+    o.summary_width = 17
+    o.on('-b', '--build', 'Build current project into .zip') {  }
+    o.on('-d', '--dir <name>', 'Specify project directory') { |d| @directory = d }
+    o.on('--debug', 'Run server noisily') { @options[:debug] = true }
+    o.on('-h', '--help', 'Print this message') { puts o; exit }
+    o.on('-g', '--gem <name>', 'Add a gem to require') { |g| open(@required, 'a') { |f| f.puts g };
+      puts "`#{g}` will be loaded next time you run Sword."; exit }
+    o.on('-v', '--version', 'Print Sword’s version') { puts "Sword #{@settings[:version]}"; exit }
+  end.parse!
+
+  $:.unshift @library
+  require 'application'
+  Application.run!
+end

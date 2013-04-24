@@ -1,41 +1,46 @@
-version: 0.4.2
+:version: 0.5.0
 
-pages:
-  markdown: [markdown, mkd, md]
-  erb: [erb, rhtml, erubis]
-  markaby: mab
-- haml
-- liquid
-- textile
-- rdoc
-- slim
+# pages:
+# - haml
+# - liquid
+# - textile
+# - rdoc
+# - slim
+#   markaby: mab
+#   markdown: 
+#   - markdown
+#   - mkd
+#   - md
+#   erb:
+#   - erb
+#   - rhtml
+#   - erubis
 
-styles:
-- sass
-- scss
-- less
+# styles:
+# - sass
+# - scss
+# - less
 
-scripts:
-- coffee
+# scripts:
+# - coffee
 
-gems:
-- haml
-- erb
-- compass
-- susy
-- sass
-- less
-- liquid
-- redcloth
-- rdoc/markup
-- slim
-- markaby
-- creole
-- coffee-script
-
-markdown:
-- redcarpet
-- rdiscount
-- bluecloth
-- kramdown
-- maruku
+# gems:
+# - haml
+# - erb
+# - compass
+# - susy
+# - sass
+# - less
+# - liquid
+# - redcloth
+# - rdoc/markup
+# - slim
+# - markaby
+# - creole
+# - coffee-script
+#   markdown:
+#   - redcarpet
+#   - rdiscount
+#   - bluecloth
+#   - kramdown
+#   - maruku
