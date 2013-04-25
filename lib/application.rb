@@ -83,7 +83,7 @@ module Sword
         return send_file "#{page}.#{xxx}" if File.exists? "#{page}.#{xxx}"
       end
       parse page, 'page', nil, {:pretty => true}
-      raise 'Page not found' if page =~ /index/
+      raise 'Page not found' if page =~ /index$/
       call env.merge('PATH_INFO' => "/#{page}/index") 
     end
   end

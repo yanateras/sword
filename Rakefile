@@ -1,4 +1,5 @@
 task :default do
+  `bin/sword`
 end
 
 task :gem do
