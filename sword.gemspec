@@ -1,5 +1,6 @@
 # encoding: utf-8
 require Pathname.new(__FILE__).dirname.realpath.to_s + '/lib/constants'
+
 Gem::Specification.new do |s|
   s.name = 'sword'
   s.version = Sword::VERSION
