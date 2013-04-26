@@ -1,27 +1,34 @@
 module Sword
   require 'sinatra/base'
-  # Hook-up all gems that we will probably need
-  PARSING['gems'].concat(File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []).each do |lib|
-    if lib.instance_of? Hash # Take the first possible variant if there are any
-      lib.values.flatten.each { |var| begin require var; break rescue LoadError; next end } 
-    else begin require lib; rescue LoadError; end end # Else, just require it
-  end
+  require 'yaml'
 
+  LIBRARY = File.dirname __FILE__
+  REQUIRED = Dir.home + '/.sword'
+  PARSING = YAML.load_file "#{LIBRARY}/parsing.yml"
+  VERSION = '0.6.0'
+  
   class Application < Sinatra::Base
     # This piece of code is from Sinatra,
     # tweaked a bit to silent Thin server
     # and add Sword version and &c.
     class << self
-      def run!
-        port = $port || 1111
+      def run! options = {}
+        # Hook-up all gems that we will probably need
+        PARSING['gems'].concat(File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []).each do |lib|
+          if lib.instance_of? Hash # Take the first possible variant if there are any
+            lib.values.flatten.each { |var| begin require var; break rescue LoadError; next end } 
+          else begin require lib; rescue LoadError; end end # Else, just require it
+        end
+        options = {:debug => false, :directory => '.', :port => 1111}.merge options
         server_settings = settings.respond_to?(:server_settings) ? settings.server_settings : {}
-        detect_rack_handler.run self, server_settings.merge(Port: port, Host: bind) do |server|
+        detect_rack_handler.run self, server_settings.merge(Port: options[:port], Host: bind) do |server|
           STDERR.print ">> Sword #{VERSION} at your service!\n" +
-          "   http://localhost:#{port} to see your project.\n" +
+          "   http://localhost:#{options[:port]} to see your project.\n" +
           "   CTRL+C to stop.\n"
           [:INT, :TERM].each { |s| trap(s) { quit! server } }
+          server.silent = true unless options[:debug]
           server.threaded = settings.threaded
-          server.silent = true unless $debug
+          @directory = options[:directory]
           set :running, true
           yield server if block_given?
         end
@@ -40,7 +47,7 @@ module Sword
     end
 
     disable :show_exceptions # show `error.erb`
-    set :views, $directory || '.' # Structure-agnostic
+    set :views, @directory # Structure-agnostic
     set :public_folder, settings.views
 
     error do
@@ -86,4 +93,11 @@ module Sword
       call env.merge('PATH_INFO' => "/#{page}/index") 
     end
   end
+  # class Export; class << self
+  #   def run!
+  #     Dir.glob("**/*").each do |f|
+  #       p $engine['pages'] + $engine['styles']
+  #     end
+  #   end
+  # end end
 end
