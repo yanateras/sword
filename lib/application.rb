@@ -49,7 +49,6 @@ module Sword
     end
 
     get('/favicon.ico') { send_file "#{LIBRARY}/favicon.ico" }
-    # 8 916 844 18 68
 
     helpers do def parse shadow, variable, output = nil, options = {}
       return send_file "#{shadow}.#{output}" if output and File.exists? "#{shadow}.#{output}"
@@ -77,10 +76,10 @@ module Sword
     end
 
     get '/*/?' do |page|
-      %w[html htm].each do |xxx|
+      %w[html htm].each do |extension|
         # This is specially for dumbasses who use .htm extension.
         # If you know another ultra-dumbass html extension, let me know.
-        return send_file "#{page}.#{xxx}" if File.exist? "#{page}.#{xxx}"
+        return send_file "#{page}.#{extension}" if File.exist? "#{page}.#{extension}"
       end
       parse page, 'page', nil, {:pretty => true}
       raise 'Page not found' if page =~ /index$/

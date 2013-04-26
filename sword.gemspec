@@ -1,10 +1,8 @@
 # encoding: utf-8
-require 'yaml'
-
-settings = YAML.load_file 'lib/settings.yml'
+require Pathname.new(__FILE__).dirname.realpath.to_s + '/lib/constants'
 Gem::Specification.new do |s|
   s.name = 'sword'
-  s.version = settings[:version]
+  s.version = Sword::VERSION
   s.platform = Gem::Platform::RUBY
 
   s.files = `git ls-files`.split "\n"

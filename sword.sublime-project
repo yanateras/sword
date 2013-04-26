@@ -1,6 +1,4 @@
-{ "folders":
-  [ {
-    "path": "/",
-    "file_exclude_patterns": ["*.sublime-workspace"]
-  } ]
-}
+{ "folders": [ {
+  "path": "/",
+  "file_exclude_patterns": ["*.sublime-workspace"]
+} ] }
