@@ -2,10 +2,10 @@ module Sword
   require 'sinatra/base'
   require 'yaml'
 
-  LIBRARY = File.dirname __FILE__
   REQUIRED = Dir.home + '/.sword'
-  PARSING = YAML.load_file "#{LIBRARY}/parsing.yml"
-  VERSION = '0.6.0'
+  LIBRARY  = File.dirname __FILE__
+  PARSING  = YAML.load_file "#{LIBRARY}/parsing.yml"
+  VERSION  = '0.6.0'
   
   class Application < Sinatra::Base
     # This piece of code is from Sinatra,
@@ -83,13 +83,13 @@ module Sword
     end
 
     get '/*/?' do |page|
-      %w[html htm].each do |extension|
+      %w[html htm xhtml xht dhtml dhtm].each do |extension|
         # This is specially for dumbasses who use .htm extension.
         # If you know another ultra-dumbass html extension, let me know.
         return send_file "#{page}.#{extension}" if File.exist? "#{page}.#{extension}"
       end
       parse page, 'page', nil, {:pretty => true}
-      raise 'Page not found' if page =~ /index$/
+      raise 'Page not found' if page =~ /\/index$/
       call env.merge('PATH_INFO' => "/#{page}/index") 
     end
   end

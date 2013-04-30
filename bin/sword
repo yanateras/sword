@@ -11,7 +11,7 @@ module Sword
     o.summary_width = 18
     o.on('--debug', 'Run server noisily') { @options[:debug] = true }
     o.on('-d', '--dir <name>', 'Specify project directory') { |d| @options[:directory] = d }
-    o.on_tail('-e', '--export', 'Build current project into zip') { Application.export! @options }
+    o.on('-e', '--export', 'Build current project into zip') { Application.export! @options }
     o.on('-g', '--gem <name>', 'Add a gem to require') { |g| open(REQUIRED, 'a') { |f| f.puts g }
       puts "`#{g}` will be loaded next time you run Sword."; exit }
     o.on('-h', '--help', 'Print this message') { puts o; exit }
