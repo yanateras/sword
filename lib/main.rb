@@ -39,7 +39,7 @@ module Sword
           yield server if block_given?
         end
       rescue Errno::EADDRINUSE, RuntimeError
-        STDERR.print "!! Another instance of Sword is running.\n"
+        STDERR.print "!! Port is in use. Is Sword already running?\n"
       end
       def quit! server        
         STDERR.print "\n"
