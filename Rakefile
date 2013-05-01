@@ -1,5 +1,10 @@
-task :default do
-  `bin/sword`
+task :default => [:test]
+
+task :test do
+  require 'minitest/spec'
+  require 'minitest/autorun'
+  require './lib/main'
+  Dir['./test/*.rb'].each { |l| require l.chomp '.rb' }
 end
 
 task :make do

@@ -20,13 +20,13 @@ module Sword
     NotFound = Class.new StandardError
     class << self
       def run! options = {}
-        options = {:debug => false, :directory => Dir.pwd, :port => 1111}.merge options
+        options = {:debug => false, :directory => Dir.pwd, :port => 1111, :silent => false}.merge options
         server_settings = settings.respond_to?(:server_settings) ? settings.server_settings : {}
         detect_rack_handler.run self, server_settings.merge(Port: options[:port], Host: bind) do |server|
           STDERR.print ">> Sword #{VERSION} at your service!\n" +
           "   http://localhost:#{options[:port]} to see your project.\n" +
           "   CTRL+C to stop.\n" + (options[:debug] ?
-              options.map { |k,v| "## #{k.capitalize}: #{v}\n"}.inject { |sum, n| sum + n } : '')
+              options.map { |k,v| "## #{k.capitalize}: #{v}\n"}.inject { |sum, n| sum + n } : '') unless options[:silent]
           [:INT, :TERM].each { |s| trap(s) { quit! server } }
           set :views, options[:directory] # Structure-agnostic
           set :public_folder, settings.views
