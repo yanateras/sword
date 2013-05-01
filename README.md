@@ -1,6 +1,6 @@
-Sword [![](//so.mu/icons/sword.png)](//so.mu/blog/sword)
+Sword [![](http://so.mu/icons/sword.png)](http://so.mu/blog/sword)
 =====
-[![Version](https://badge.fury.io/rb/sword.png)](//rubygems.com/gems/sword)]
+[![Version](https://badge.fury.io/rb/sword.png)](http://rubygems.com/gems/sword)
 [![Build Status](https://secure.travis-ci.org/somu/sword.png?branch=master)](http://travis-ci.org/somu/sword)
 [![Dependency Status](https://gemnasium.com/somu/sword.png)](https://gemnasium.com/somu/sword)
 
