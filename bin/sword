@@ -9,13 +9,13 @@ module Sword
   OptionParser.new do |o|
     @options = {}
     o.summary_width = 18
+    o.on('-b', '--build <file>', 'Build project into zip/folder') { Application.export! @options }
     o.on('--debug', 'Run server noisily') { @options[:debug] = true }
     o.on('-d', '--dir <name>', 'Specify project directory') { |d| @options[:directory] = d }
-    o.on('-e', '--export', 'Build current project into zip') { Application.export! @options }
     o.on('-g', '--gem <name>', 'Add a gem to require') { |g| open(REQUIRED, 'a') { |f| f.puts g }
       puts "`#{g}` will be loaded next time you run Sword."; exit }
     o.on('-h', '--help', 'Print this message') { puts o; exit }
-    o.on('-i', '--install', 'Install must-have gems') { exec 'gem install ' + SETTINGS[:gems].map { |n| n.respond_to?(:first) ? n.last : n } * ' '; exit }
+    o.on('-i', '--install', 'Try to install must-have gems') { exec 'gem install ' + SETTINGS[:gems].map { |n| n.respond_to?(:first) ? n.last : n } * ' '; exit }
     o.on('-p', '--port <num>', 'Change the port, 1111 by default') { |p| @options[:port] = p }
     o.on('-s', '--server <uri>', 'Export into remote folder') { exit }
     o.on('-v', '--version', 'Print Sword’s version') { puts 'Sword ' + VERSION; exit }

@@ -5,40 +5,57 @@ module Sword
   REQUIRED = Dir.home + '/.sword'
   LIBRARY  = File.dirname __FILE__
   PARSING  = YAML.load_file "#{LIBRARY}/parsing.yml"
-  VERSION  = '0.6.0'
-  
+  VERSION  = '0.7.1'
+
+  # Hook-up all gems that we will probably need
+  PARSING['gems'].concat(File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []).each do |lib|
+    lib.instance_of?(Hash) ? lib.values.first.each { |g| begin require g; break; rescue LoadError; next end } :
+    begin require lib; rescue LoadError; end
+  end
+
   class Application < Sinatra::Base
     # This piece of code is from Sinatra,
     # tweaked a bit to silent Thin server
     # and add Sword version and &c.
+    NotFound = Class.new StandardError
     class << self
       def run! options = {}
-        # Hook-up all gems that we will probably need
-        PARSING['gems'].concat(File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []).each do |lib|
-          if lib.instance_of? Hash # Take the first possible variant if there are any
-            lib.values.flatten.each { |var| begin require var; break rescue LoadError; next end } 
-          else begin require lib; rescue LoadError; end end # Else, just require it
-        end
-        options = {:debug => false, :directory => '.', :port => 1111}.merge options
+        options = {:debug => false, :directory => Dir.pwd, :port => 1111}.merge options
         server_settings = settings.respond_to?(:server_settings) ? settings.server_settings : {}
         detect_rack_handler.run self, server_settings.merge(Port: options[:port], Host: bind) do |server|
           STDERR.print ">> Sword #{VERSION} at your service!\n" +
           "   http://localhost:#{options[:port]} to see your project.\n" +
-          "   CTRL+C to stop.\n"
+          "   CTRL+C to stop.\n" + (options[:debug] ?
+              options.map { |k,v| "## #{k.capitalize}: #{v}\n"}.inject { |sum, n| sum + n } : '')
           [:INT, :TERM].each { |s| trap(s) { quit! server } }
-          server.silent = true unless options[:debug]
+          set :views, options[:directory] # Structure-agnostic
+          set :public_folder, settings.views
+          unless options[:debug]
+            server.silent = true
+            disable :show_exceptions
+          end
           server.threaded = settings.threaded
-          @directory = options[:directory]
           set :running, true
           yield server if block_given?
         end
       rescue Errno::EADDRINUSE, RuntimeError
         STDERR.print "!! Another instance of Sword is running.\n"
       end
-      def quit! server
-        server.stop!
+      def quit! server        
         STDERR.print "\n"
+        server.stop!
       end
+      def parse list, pattern, options = {}, &block
+        self.get pattern do |file| begin
+          output = pattern[/(?<=\.).+$/]
+          return send_file "#{file}.#{output}" if output and File.exists? "#{file}.#{output}"
+          PARSING[list].map { |e| e.instance_of?(String) ? {e => [e]} : e }.each do |language|
+            language.each do |engine, extensions| extensions.each do |extension|
+              # Iterate through extensions and find the engine you need.
+              return send engine, file.to_sym, options if File.exists? "#{file}.#{extension}"
+          end end end; raise NotFound
+      rescue NotFound; block_given? ? yield(file) : raise
+      end end end
     end
 
     if defined? Compass
@@ -46,35 +63,13 @@ module Sword
       compass = Compass.sass_engine_options
     end
 
-    disable :show_exceptions # show `error.erb`
-    set :views, @directory # Structure-agnostic
-    set :public_folder, settings.views
-
     error do
       @error = env['sinatra.error']
       erb :error, :views => LIBRARY
     end
 
-    get('/favicon.ico') { send_file "#{LIBRARY}/favicon.ico" }
-
-    helpers do def parse shadow, variable, output = nil, options = {}
-      return send_file "#{shadow}.#{output}" if output and File.exists? "#{shadow}.#{output}"
-      PARSING[variable + 's'].map { |e| e.instance_of?(String) ? {e => [e]} : e }.each do |language|
-        language.each do |engine, extension| extension.each do |x|
-          # Iterate through extensions and find the engine you need.
-          return send engine, shadow.to_sym, options if File.exists? "#{shadow}.#{x}"
-        end end
-      end
-    end end
-
-    get '/*.css' do |style|
-      parse style, 'style', 'css', (compass || {})
-      raise 'Stylesheet not found'
-    end
-
-    get '/*.js' do |script|
-      parse script, 'script', 'js'
-      raise 'Script not found'
+    get '/favicon.ico' do
+      send_file "#{LIBRARY}/favicon.ico"
     end
 
     get '/' do
@@ -82,22 +77,17 @@ module Sword
       call env.merge 'PATH_INFO' => '/index'
     end
 
-    get '/*/?' do |page|
+    parse 'styles', '/*.css', (compass || {})
+    parse 'scripts', '/*.js'
+
+    set :slim, :pretty => true
+    parse 'pages', '/*/?' do |page|
       %w[html htm xhtml xht dhtml dhtm].each do |extension|
-        # This is specially for dumbasses who use .htm extension.
         # If you know another ultra-dumbass html extension, let me know.
         return send_file "#{page}.#{extension}" if File.exist? "#{page}.#{extension}"
       end
-      parse page, 'page', nil, {:pretty => true}
-      raise 'Page not found' if page =~ /\/index$/
-      call env.merge('PATH_INFO' => "/#{page}/index") 
+      raise NotFound if page =~ /\/index$/ or not defined? env
+      call env.merge 'PATH_INFO' => "/#{page}/index"
     end
   end
-  # class Export; class << self
-  #   def run!
-  #     Dir.glob("**/*").each do |f|
-  #       p $engine['pages'] + $engine['styles']
-  #     end
-  #   end
-  # end end
 end

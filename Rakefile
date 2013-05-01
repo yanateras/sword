@@ -3,11 +3,7 @@ task :default do
 end
 
 task :make do
-  `gem build sword.gemspec`
-  `for gem in sword-*.gem; do
-    gem push $gem
-    rm $gem
-  done`
+  exec './make.sh'
 end
 
 task :update do
