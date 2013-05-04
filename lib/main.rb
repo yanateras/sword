@@ -23,14 +23,14 @@ module Sword
         options = {:debug => false, :directory => Dir.pwd, :port => 1111, :silent => false}.merge(options)
         server_settings = settings.respond_to?(:server_settings) ? settings.server_settings : {}
         detect_rack_handler.run self, server_settings.merge(Port: options[:port], Host: bind) do |server|
-          warn ">> Sword #{VERSION} at your service!\n" +
+          STDERR.print ">> Sword #{VERSION} at your service!\n" +
           "   http://localhost:#{options[:port]} to see your project.\n" +
           "   CTRL+C to stop.\n"
           [:INT, :TERM].each { |s| trap(s) { quit!(server) } }
           unless options[:debug]
             server.silent = true
             disable :show_exceptions
-            warn options.map { |k,v| "## #{k.capitalize}: #{v}\n"}.inject { |sum, n| sum + n } unless options[:silent]
+            STDERR.print options.map { |k,v| "## #{k.capitalize}: #{v}\n"}.inject { |sum, n| sum + n } unless options[:silent]
           end
           set :views, options[:directory] # Structure-agnostic
           set :public_folder, settings.views
@@ -39,10 +39,10 @@ module Sword
           yield server if block_given?
         end
       rescue Errno::EADDRINUSE, RuntimeError
-        warn "!! Port is in use. Is Sword already running?\n"
+        STDERR.print "!! Port is in use. Is Sword already running?\n"
       end
       def quit!(server)
-        warn "\n"
+        STDERR.print "\n"
         server.stop!
       end
       def parse(list, pattern, options = {}, &block)
