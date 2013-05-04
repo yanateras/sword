@@ -7,9 +7,9 @@ module Sword
   PARSING  = YAML.load_file "#{LIBRARY}/parsing.yml"
   VERSION  = '0.7.1'
 
-  # Hook-up all gems that we will probably need
+  # Hook-up all gems that we will probably need:
   PARSING['gems'].concat(File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []).each do |lib|
-    lib.instance_of?(Hash) ? lib.values.first.each { |g| begin require g; break; rescue LoadError; next end } :
+    Hash === lib ? lib.values.first.each { |g| begin require g; break; rescue LoadError; next end } :
     begin require lib; rescue LoadError; end
   end
 
@@ -20,32 +20,32 @@ module Sword
     NotFound = Class.new StandardError
     class << self
       def run! options = {}
-        options = {:debug => false, :directory => Dir.pwd, :port => 1111, :silent => false}.merge options
+        options = {:debug => false, :directory => Dir.pwd, :port => 1111, :silent => false}.merge(options)
         server_settings = settings.respond_to?(:server_settings) ? settings.server_settings : {}
         detect_rack_handler.run self, server_settings.merge(Port: options[:port], Host: bind) do |server|
-          STDERR.print ">> Sword #{VERSION} at your service!\n" +
+          warn ">> Sword #{VERSION} at your service!\n" +
           "   http://localhost:#{options[:port]} to see your project.\n" +
-          "   CTRL+C to stop.\n" + (options[:debug] ?
-              options.map { |k,v| "## #{k.capitalize}: #{v}\n"}.inject { |sum, n| sum + n } : '') unless options[:silent]
-          [:INT, :TERM].each { |s| trap(s) { quit! server } }
-          set :views, options[:directory] # Structure-agnostic
-          set :public_folder, settings.views
+          "   CTRL+C to stop.\n"
+          [:INT, :TERM].each { |s| trap(s) { quit!(server) } }
           unless options[:debug]
             server.silent = true
             disable :show_exceptions
+            warn options.map { |k,v| "## #{k.capitalize}: #{v}\n"}.inject { |sum, n| sum + n } unless options[:silent]
           end
+          set :views, options[:directory] # Structure-agnostic
+          set :public_folder, settings.views
           server.threaded = settings.threaded
           set :running, true
           yield server if block_given?
         end
       rescue Errno::EADDRINUSE, RuntimeError
-        STDERR.print "!! Port is in use. Is Sword already running?\n"
+        warn "!! Port is in use. Is Sword already running?\n"
       end
-      def quit! server        
-        STDERR.print "\n"
+      def quit!(server)
+        warn "\n"
         server.stop!
       end
-      def parse list, pattern, options = {}, &block
+      def parse(list, pattern, options = {}, &block)
         self.get pattern do |file| begin
           output = pattern[/(?<=\.).+$/]
           return send_file "#{file}.#{output}" if output and File.exists? "#{file}.#{output}"
@@ -80,6 +80,10 @@ module Sword
     parse 'styles', '/*.css', (compass || {})
     parse 'scripts', '/*.js'
 
+    get '*.html?' do |route|
+      call env.merge 'PATH_INFO' => route
+    end
+
     set :slim, :pretty => true
     parse 'pages', '/*/?' do |page|
       %w[html htm xhtml xht dhtml dhtm].each do |extension|
@@ -87,7 +91,7 @@ module Sword
         return send_file "#{page}.#{extension}" if File.exist? "#{page}.#{extension}"
       end
       raise NotFound if page =~ /\/index$/ or not defined? env
-      call env.merge 'PATH_INFO' => "/#{page}/index"
+      call env.merge({'PATH_INFO' => "/#{page}/index"})
     end
   end
 end
