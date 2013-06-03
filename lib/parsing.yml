@@ -19,6 +19,14 @@ gems:
   - maruku
 - compass
 
+html:
+- html
+- htm
+- xhtml
+- xht
+- dhtml
+- dhtm
+
 pages:
 - haml
 - liquid
