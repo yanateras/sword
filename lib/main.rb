@@ -5,7 +5,7 @@ module Sword
   REQUIRED = Dir.home + '/.sword'
   LIBRARY  = File.dirname __FILE__
   PARSING  = YAML.load_file "#{LIBRARY}/parsing.yml"
-  VERSION  = '0.7.1'
+  VERSION  = '0.7.2'
 
   class Application < Sinatra::Base
     # This piece of code is from Sinatra,

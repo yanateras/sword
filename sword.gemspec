@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
   s.homepage = 'http://github.com/somu/sword'
 
   s.add_dependency 'sinatra', '>= 1.3.2'
-  s.add_dependency 'thin', '>= 1.4.0'
   s.add_development_dependency 'rake', '>= 10.0.2'
 
   s.license = 'MIT'
