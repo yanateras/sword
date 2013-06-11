@@ -1,4 +1,5 @@
 module Sword
+  require 'rubygems'
   require 'sinatra/base'
   require 'yaml'
 
