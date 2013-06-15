@@ -116,7 +116,7 @@ module Sword
         end
 
         if defined? Compass
-          Compass.add_project_configuration "#{LIBRARY}/compass.rb"
+          Compass.add_project_configuration "#{LIBRARY}/style.rb"
           @compass = Compass.sass_engine_options
         end
       end

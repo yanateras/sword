@@ -1,16 +1,22 @@
 task :default => [:test]
 
 task :test do
+  %w[/lib /test].each { |dir| $:.unshift File.dirname(__FILE__) + dir }
   require 'minitest/spec'
   require 'minitest/autorun'
-  require './lib/main'
-  Dir['./test/*.rb'].each { |l| require l.chomp '.rb' }
+  require 'main'
+  
+  Dir['./test/*.rb'].each { |t| require t[/[^\/]+(?=\.)/] }
 end
 
 task :make do
-  exec './make.sh'
+  system 'gem build sword.gemspec
+  for gem in sword-*.gem; do
+    gem push $gem
+    rm $gem
+  done'
 end
 
 task :update do
-  exec 'gem install sword && gem cleanup sword'
+  system 'gem install sword && gem cleanup sword'
 end

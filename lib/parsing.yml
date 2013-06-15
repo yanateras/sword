@@ -2,7 +2,6 @@ gems:
 - slim
 - haml
 - erb
-- sass
 - less
 - liquid
 - rdoc
@@ -11,13 +10,15 @@ gems:
 - creole
 - therubyracer
 - coffee-script
+- sass:
+  - compass
+  - sass
 - markdown:
   - redcarpet
   - rdiscount
   - bluecloth
   - kramdown
   - maruku
-- compass
 
 html:
 - html
