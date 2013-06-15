@@ -15,35 +15,50 @@ module Sword
     NotFound = Class.new StandardError
     class << self
       def run!(options = {})
-        load
         options = {:debug => false, :directory => Dir.pwd, :port => 1111, :silent => false}.merge(options)
+        @debug = options[:debug]
+        load
+
         server_settings = settings.respond_to?(:server_settings) ? settings.server_settings : {}
-        detect_rack_handler.run self, server_settings.merge(Port: options[:port], Host: bind) do |server|
-          [:INT, :TERM].each { |s| trap(s) { quit!(server) } }
-          STDERR.print ">> Sword #{VERSION} at your service!\n" \
-          "   http://localhost:#{options[:port]} to see your project.\n" \
-          "   CTRL+C to stop.\n"
-          STDERR.print options.
-            map { |k,v| "## #{k.capitalize}: #{v}\n" }.
-            inject { |sum, n| sum + n } if options[:debug] and not options[:silent]
-          unless options[:debug]
-            server.silent = true
-            disable :show_exceptions
-          end
-          set :views, options[:directory] # Structure-agnostic
-          set :public_folder, settings.views
-          server.threaded = settings.threaded
-          set :running, true
-          yield server if block_given?
+        detect_rack_handler.run self, server_settings.merge(:Port => options[:port], :Host => bind).
+          merge( defined?(WEBrick) && !(@debug) ? {:AccessLog => [], :Logger => WEBrick::Log::new("/dev/null", 7)} : {} ) do |server|
+            [:INT, :TERM].each { |s| trap(s) { quit!(server) } }
+            STDERR.print ">> Sword #{VERSION} at your service!\n" \
+            "   http://localhost:#{options[:port]} to see your project.\n" \
+            "   CTRL+C to stop.\n"
+            STDERR.print options.
+              map { |k,v| "## #{k.capitalize}: #{v}\n" }.
+              inject { |sum, n| sum + n } if @debug and not options[:silent]
+            unless @debug
+              server.silent = true if server.respond_to? :silent
+              disable :show_exceptions
+            end
+            set :views, options[:directory] # Structure-agnostic
+            set :public_folder, settings.views
+            server.threaded = settings.threaded if server.respond_to? :threaded
+            set :running, true
+            yield server if block_given?
         end
       rescue Errno::EADDRINUSE, RuntimeError
         STDERR.print "!! Port is in use. Is Sword already running?\n"
       end
+      def debug(message, symbol = false)
+        if @debug
+          return print symbol * 2 + ' ' + message if symbol
+          print message
+        end
+      end
       def load
+        debug "Loading gems:\n", ' '
         # Hook-up all gems that we will probably need:
         PARSING['gems'].concat(File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []).each do |lib|
           Hash === lib ? lib.values.first.each { |g| begin require g; break; rescue LoadError; next end } :
-          begin require lib; p lib; rescue LoadError; p lib + 'not' end
+          begin
+            debug lib + '.' * (15 - lib.length), '  '
+            require lib; debug "OK\n"
+          rescue LoadError
+            debug "Fail\n"
+          end
         end
 
         if defined? Compass
@@ -53,9 +68,11 @@ module Sword
       end
       def quit!(server)
         STDERR.print "\n"
-        server.stop!
+        server.respond_to?(:stop!) ? server.stop! : server.stop
+
       end
       def parse(list, pattern, options = {}, &block)
+        # TODO: too much magic; everything should be commented
         self.get pattern do |file| begin
           output = pattern[/(?<=\.).+$/]
           return send_file "#{file}.#{output}" if output and File.exists? "#{file}.#{output}"
