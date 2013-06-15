@@ -12,11 +12,9 @@ module Sword
     #o.on('-b', '--build <file>', 'Build project into zip/folder') { Application.export!(@options) }
     o.on('--debug', 'Show server’s guts') { @options[:debug] = true }
     o.on('-d', '--dir <name>', 'Specify watch directory') { |d| @options[:directory] = d }
-    o.on('-g', '--gem <name>', 'Add a gem to require') { |name| open(REQUIRED, 'a') { |f| f.puts name }
-      puts "`#{g}` will be loaded next time you run Sword."; exit }
+    o.on('-g', '--gem <name>', 'Add a gem to require') { |name| open(REQUIRED, 'a') { |f| f.puts name }; puts "`#{g}` will be loaded next time you run Sword."; exit }
     o.on('-h', '--help', 'Print this message') { puts o; exit }
-    # TODO: -i should not be avaliable while inside .exe
-    o.on('-i', '--install', 'Try to install must-have gems') { exec 'gem install ' + PARSING[:gems].map { |n| n.respond_to?(:first) ? n.first : n } * ' '; exit }
+    o.on('-i', '--install', 'Try to install must-have gems') { exec 'gem install ' + PARSING[:gems].map { |n| n.respond_to?(:first) ? n.first : n } * ' '; exit } unless defined? Ocra
     #o.on('-o', '--out <io>', 'Specify IO, STDERR by default') { |io| @options[:out] = io }
     o.on('-p', '--port <num>', 'Change the port, 1111 by default') { |num| @options[:port] = num }
     #o.on('-s', '--server <uri>', 'Export into remote folder') { exit }
