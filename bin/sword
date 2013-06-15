@@ -2,24 +2,25 @@
 # encoding: utf-8
 
 module Sword
+  $:.unshift File.dirname(__FILE__) + '/../lib'
   require 'optparse'
-  require 'pathname'
-  require Pathname.new(__FILE__).dirname.realpath.to_s + '/../lib/main'
+  require 'main'
 
   OptionParser.new do |o|
     @options = {}
     o.summary_width = 18
-    o.on('-b', '--build <file>', 'Build project into zip/folder') { Application.export!(@options) }
-    o.on('--debug', 'Run server noisily') { @options[:debug] = true }
-    o.on('-d', '--dir <name>', 'Specify project directory') { |d| @options[:directory] = d }
+    #o.on('-b', '--build <file>', 'Build project into zip/folder') { Application.export!(@options) }
+    o.on('--debug', 'Show server’s guts') { @options[:debug] = true }
+    o.on('-d', '--dir <name>', 'Specify watch directory') { |d| @options[:directory] = d }
     o.on('-g', '--gem <name>', 'Add a gem to require') { |name| open(REQUIRED, 'a') { |f| f.puts name }
       puts "`#{g}` will be loaded next time you run Sword."; exit }
     o.on('-h', '--help', 'Print this message') { puts o; exit }
+    # TODO: -i should not be avaliable while inside .exe
     o.on('-i', '--install', 'Try to install must-have gems') { exec 'gem install ' + PARSING[:gems].map { |n| n.respond_to?(:first) ? n.first : n } * ' '; exit }
-    o.on('-o', '--out <io>', 'Specify IO, STDERR by default') { |io| @options[:out] = io }
+    #o.on('-o', '--out <io>', 'Specify IO, STDERR by default') { |io| @options[:out] = io }
     o.on('-p', '--port <num>', 'Change the port, 1111 by default') { |num| @options[:port] = num }
-    o.on('-s', '--server <uri>', 'Export into remote folder') { exit }
-    o.on('--silent', 'Turn off any messages') { @options[:silent] = true }
+    #o.on('-s', '--server <uri>', 'Export into remote folder') { exit }
+    o.on('-s', '--silent', 'Try to turn off any messages') { @options[:silent] = true }
     o.on('-v', '--version', 'Print Sword’s version') { puts 'Sword ' + VERSION; exit }
   end.parse!
   Application.run!(@options)

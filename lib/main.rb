@@ -6,7 +6,7 @@ module Sword
   REQUIRED = Dir.home + '/.sword'
   LIBRARY  = File.dirname __FILE__
   PARSING  = YAML.load_file "#{LIBRARY}/parsing.yml"
-  VERSION  = '0.7.2'
+  VERSION  = '0.8.0'
 
   class Application < Sinatra::Base
     # This piece of code is from Sinatra,
@@ -14,21 +14,40 @@ module Sword
     # and add Sword version and &c.
     NotFound = Class.new StandardError
     class << self
+      # Input/output
+
+      def puts(*args)
+        STDERR.puts(*args) unless @silent
+      end
+
+      def print(*args)
+        STDERR.print(*args) unless @silent
+      end
+
+      def debug(message, symbol = false)
+        if @debug
+          return print symbol * 2 + ' ' + message if symbol
+          print message
+        end
+      end
+
+
+      # Sinatra-related
+
       def run!(options = {})
         options = {:debug => false, :directory => Dir.pwd, :port => 1111, :silent => false}.merge(options)
-        @debug = options[:debug]
+        @debug, @silent = options[:debug], options[:silent]
         load
 
         server_settings = settings.respond_to?(:server_settings) ? settings.server_settings : {}
-        detect_rack_handler.run self, server_settings.merge(:Port => options[:port], :Host => bind).
+        detect_rack_handler.run self, server_settings.
+          merge(:Port => options[:port], :Host => bind).
           merge( defined?(WEBrick) && !(@debug) ? {:AccessLog => [], :Logger => WEBrick::Log::new("/dev/null", 7)} : {} ) do |server|
             [:INT, :TERM].each { |s| trap(s) { quit!(server) } }
-            STDERR.print ">> Sword #{VERSION} at your service!\n" \
+            print ">> Sword #{VERSION} at your service!\n" \
             "   http://localhost:#{options[:port]} to see your project.\n" \
             "   CTRL+C to stop.\n"
-            STDERR.print options.
-              map { |k,v| "## #{k.capitalize}: #{v}\n" }.
-              inject { |sum, n| sum + n } if @debug and not options[:silent]
+            debug options.map { |k,v| "## #{k.capitalize}: #{v}\n" }.inject { |sum, n| sum + n }
             unless @debug
               server.silent = true if server.respond_to? :silent
               disable :show_exceptions
@@ -40,22 +59,57 @@ module Sword
             yield server if block_given?
         end
       rescue Errno::EADDRINUSE, RuntimeError
-        STDERR.print "!! Port is in use. Is Sword already running?\n"
+        print "!! Port is in use. Is Sword already running?\n"
       end
-      def debug(message, symbol = false)
-        if @debug
-          return print symbol * 2 + ' ' + message if symbol
-          print message
+
+      def quit!(server)
+        print "\n"
+        server.respond_to?(:stop!) ? server.stop! : server.stop
+      end
+
+
+      # Sword-specific
+
+      def parse(list, pattern, options = {}, &block)
+        self.get pattern do |file|
+          begin
+            output = pattern[/(?<=\.).+$/]
+            return send_file "#{file}.#{output}" if output and File.exists? "#{file}.#{output}"
+            PARSING[list].map { |e| String === e ? {e => [e]} : e }.each do |language|
+              language.each do |engine, extensions| extensions.each do |extension|
+                # Iterate through extensions and find the engine you need.
+                return send engine, file.to_sym, options if File.exists? "#{file}.#{extension}"
+              end end
+            end
+            raise NotFound
+          rescue NotFound
+            block_given? ? yield(file) : raise
+          end
         end
       end
+
       def load
         debug "Loading gems:\n", ' '
-        # Hook-up all gems that we will probably need:
         PARSING['gems'].concat(File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []).each do |lib|
-          Hash === lib ? lib.values.first.each { |g| begin require g; break; rescue LoadError; next end } :
+          # Hash case (a lot of variants)
+          Hash === lib ?
+          lib.values.first.each do |variant|
+            begin
+              debug variant + '.' * (15 - variant.length), '  '
+              require variant
+              debug "OK\n"
+              break
+            rescue LoadError
+              debug "Fail\n"
+              next
+            end
+          end
+
+          :
           begin
             debug lib + '.' * (15 - lib.length), '  '
-            require lib; debug "OK\n"
+            require lib
+            debug "OK\n"
           rescue LoadError
             debug "Fail\n"
           end
@@ -66,31 +120,14 @@ module Sword
           @compass = Compass.sass_engine_options
         end
       end
-      def quit!(server)
-        STDERR.print "\n"
-        server.respond_to?(:stop!) ? server.stop! : server.stop
-
-      end
-      def parse(list, pattern, options = {}, &block)
-        # TODO: too much magic; everything should be commented
-        self.get pattern do |file| begin
-          output = pattern[/(?<=\.).+$/]
-          return send_file "#{file}.#{output}" if output and File.exists? "#{file}.#{output}"
-          PARSING[list].map { |e| e.instance_of?(String) ? {e => [e]} : e }.each do |language|
-            language.each do |engine, extensions| extensions.each do |extension|
-              # Iterate through extensions and find the engine you need.
-              return send engine, file.to_sym, options if File.exists? "#{file}.#{extension}"
-          end end end; raise NotFound
-      rescue NotFound; block_given? ? yield(file) : raise
-      end end end
     end
 
     helpers do
       def jquery(version = '1.8.3')
         "<script src='//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js'/>"
       end
-      def font(options)
-      end
+
+      def font(options) end
     end
 
     error do
