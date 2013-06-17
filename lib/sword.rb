@@ -6,8 +6,8 @@ module Sword
 
   REQUIRED = Dir.home + '/.sword'
   LIBRARY  = File.dirname __FILE__
-  PARSING  = YAML.load_file "#{LIBRARY}/parsing.yml"
-  VERSION  = '0.8.0'
+  PARSE    = YAML.load_file "#{LIBRARY}/parse.yml"
+  VERSION  = '0.8.2'
 
   class Application < Sinatra::Base
     # This piece of code is from Sinatra,
@@ -76,7 +76,7 @@ module Sword
           begin
             output = pattern[/(?<=\.).+$/]
             return send_file "#{file}.#{output}" if output and File.exists? "#{file}.#{output}"
-            PARSING[list].map { |e| String === e ? {e => [e]} : e }.each do |language|
+            PARSE[list].map { |e| String === e ? {e => [e]} : e }.each do |language|
               language.each do |engine, extensions| extensions.each do |extension|
                 # Iterate through extensions and find the engine you need.
                 return send engine, file.to_sym, options if File.exists? "#{file}.#{extension}"
@@ -91,7 +91,7 @@ module Sword
 
       def load
         debug "Loading gems:\n", ' '
-        PARSING['gems'].concat(File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []).each do |lib|
+        PARSE['gems'].concat(File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []).each do |lib|
           # Hash case (a lot of variants)
           Hash === lib ?
           lib.values.first.each do |variant|
@@ -123,6 +123,7 @@ module Sword
       end
     end
 
+
     helpers do
       def jquery(version = '1.8.3')
         "<script src='//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js'/>"
@@ -148,13 +149,13 @@ module Sword
     parse 'styles', '/*.css', load_compass
     parse 'scripts', '/*.js'
 
-    get %r{(.+?)\.(#{PARSING['html'] * '|'})} do |route, _|
+    get %r{(.+?)\.(#{PARSE['html'] * '|'})} do |route, _|
       call env.merge 'PATH_INFO' => route
     end
 
     set :slim, :pretty => true
     parse 'pages', '/*/?' do |page|
-      PARSING['html'].each do |extension|
+      PARSE['html'].each do |extension|
         # If you know another ultra-dumbass html extension, let me know.
         return send_file "#{page}.#{extension}" if File.exist? "#{page}.#{extension}"
       end

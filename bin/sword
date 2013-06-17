@@ -2,19 +2,18 @@
 # encoding: utf-8
 
 module Sword
-  $:.unshift File.dirname(__FILE__) + '/../lib'
+  require File.dirname(__FILE__) + '/../lib/sword'
   require 'optparse'
-  require 'main'
 
   OptionParser.new do |o|
     @options = {}
     o.summary_width = 18
     #o.on('-b', '--build <file>', 'Build project into zip/folder') { Application.export!(@options) }
     o.on('--debug', 'Show server’s guts') { @options[:debug] = true }
-    o.on('-d', '--dir <name>', 'Specify watch directory') { |d| @options[:directory] = d }
+    o.on('-d', '--dir <name>', 'Specify watch directory') { |name| @options[:directory] = name }
     o.on('-g', '--gem <name>', 'Add a gem to require') { |name| open(REQUIRED, 'a') { |f| f.puts name }; puts "`#{g}` will be loaded next time you run Sword."; exit }
     o.on('-h', '--help', 'Print this message') { puts o; exit }
-    o.on('-i', '--install', 'Try to install must-have gems') { exec 'gem install ' + PARSING[:gems].map { |n| n.respond_to?(:first) ? n.first : n } * ' '; exit } unless defined? Ocra
+    o.on('-i', '--install', 'Try to install must-have gems') { exec 'gem install ' + PARSE[:gems].map { |n| n.respond_to?(:first) ? n.first : n } * ' '; exit } unless defined? Ocra
     #o.on('-o', '--out <io>', 'Specify IO, STDERR by default') { |io| @options[:out] = io }
     o.on('-p', '--port <num>', 'Change the port, 1111 by default') { |num| @options[:port] = num }
     #o.on('-s', '--server <uri>', 'Export into remote folder') { exit }

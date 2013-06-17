@@ -1,6 +1,5 @@
 # encoding: utf-8
-$:.unshift File.dirname(__FILE__) + '/lib'
-require 'main'
+require File.dirname(__FILE__) + '/lib/sword'
 
 Gem::Specification.new do |s|
   s.name = 'sword'
@@ -13,6 +12,10 @@ Gem::Specification.new do |s|
   s.authors = 'George'
   s.email = 'somu@so.mu'
   s.homepage = 'http://github.com/somu/sword'
+
+  s.files = `git ls-files`.split("\n") - %w[.gitignore .travis.yml sword.sublime-project]
+  s.executables = `git ls-files -- bin/*`.split("\n").map { |f| File.basename f }
+  s.require_paths = %w[lib]
 
   s.add_dependency 'sinatra', '>= 1.3.2'
   s.add_development_dependency 'rake', '>= 10.0.2'
