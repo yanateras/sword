@@ -1,13 +1,12 @@
 module Sword
   require 'rubygems'
-  require 'compass'
   require 'sinatra/base'
   require 'yaml'
 
   REQUIRED = Dir.home + '/.sword'
   LIBRARY  = File.dirname __FILE__
   PARSE    = YAML.load_file "#{LIBRARY}/parse.yml"
-  VERSION  = '0.8.2'
+  VERSION  = '0.8.3'
 
   class Application < Sinatra::Base
     # This piece of code is from Sinatra,
@@ -38,7 +37,8 @@ module Sword
       def run!(options = {})
         options = {:debug => false, :directory => Dir.pwd, :port => 1111, :silent => false}.merge(options)
         @debug, @silent = options[:debug], options[:silent]
-        load
+        load unless options[:unload]
+        init
 
         server_settings = settings.respond_to?(:server_settings) ? settings.server_settings : {}
         detect_rack_handler.run self, server_settings.
@@ -115,52 +115,54 @@ module Sword
             debug "Fail\n"
           end
         end
+
+        load_compass if defined? Compass
       end
 
       def load_compass
-        Compass.add_project_configuration "#{LIBRARY}/style.rb" unless defined? Compass
-        Compass.sass_engine_options
-      end
-    end
-
-
-    helpers do
-      def jquery(version = '1.8.3')
-        "<script src='//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js'/>"
+        Compass.add_project_configuration "#{LIBRARY}/compass.rb"
+        @compass = Compass.sass_engine_options
       end
 
-      def font(options) end
-    end
+      def init
+        helpers do
+          def font(options) end
+          def jquery(version = '1.8.3')
+            "<script src='//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js'/>"
+          end
+        end
 
-    error do
-      @error = env['sinatra.error']
-      erb :error, :views => LIBRARY
-    end
+        error do
+          @error = env['sinatra.error']
+          erb :error, :views => LIBRARY
+        end
 
-    get '/favicon.ico' do
-      send_file "#{LIBRARY}/favicon.ico"
-    end
+        get '/favicon.ico' do
+          send_file "#{LIBRARY}/favicon.ico"
+        end
 
-    get '/' do
-      # Call /index, the same shit
-      call env.merge 'PATH_INFO' => '/index'
-    end
+        get '/' do
+          # Call /index, the same shit
+          call env.merge 'PATH_INFO' => '/index'
+        end
 
-    parse 'styles', '/*.css', load_compass
-    parse 'scripts', '/*.js'
+        parse 'styles', '/*.css', (@compass || {})
+        parse 'scripts', '/*.js'
 
-    get %r{(.+?)\.(#{PARSE['html'] * '|'})} do |route, _|
-      call env.merge 'PATH_INFO' => route
-    end
+        get %r{(.+?)\.(#{PARSE['html'] * '|'})} do |route, _|
+          call env.merge 'PATH_INFO' => route
+        end
 
-    set :slim, :pretty => true
-    parse 'pages', '/*/?' do |page|
-      PARSE['html'].each do |extension|
-        # If you know another ultra-dumbass html extension, let me know.
-        return send_file "#{page}.#{extension}" if File.exist? "#{page}.#{extension}"
+        set :slim, :pretty => true
+        parse 'pages', '/*/?' do |page|
+          PARSE['html'].each do |extension|
+            # If you know another ultra-dumbass html extension, let me know.
+            return send_file "#{page}.#{extension}" if File.exist? "#{page}.#{extension}"
+          end
+          raise NotFound if page =~ /\/index$/ or not defined? env
+          call env.merge({'PATH_INFO' => "/#{page}/index"})
+        end
       end
-      raise NotFound if page =~ /\/index$/ or not defined? env
-      call env.merge({'PATH_INFO' => "/#{page}/index"})
     end
   end
 end

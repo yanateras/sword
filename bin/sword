@@ -14,10 +14,11 @@ module Sword
     o.on('-g', '--gem <name>', 'Add a gem to require') { |name| open(REQUIRED, 'a') { |f| f.puts name }; puts "`#{g}` will be loaded next time you run Sword."; exit }
     o.on('-h', '--help', 'Print this message') { puts o; exit }
     o.on('-i', '--install', 'Try to install must-have gems') { exec 'gem install ' + PARSE[:gems].map { |n| n.respond_to?(:first) ? n.first : n } * ' '; exit } unless defined? Ocra
+    o.on('-m', '--manual <x,y>', 'Specify gems to require') { |gems| gems.each { |g| require g }; @options[:unload] = true }
     #o.on('-o', '--out <io>', 'Specify IO, STDERR by default') { |io| @options[:out] = io }
     o.on('-p', '--port <num>', 'Change the port, 1111 by default') { |num| @options[:port] = num }
-    #o.on('-s', '--server <uri>', 'Export into remote folder') { exit }
     o.on('-s', '--silent', 'Try to turn off any messages') { @options[:silent] = true }
+    o.on('-u', '--unload', 'Skip heuristically loading gems') { @options[:unload] = true }
     o.on('-v', '--version', 'Print Sword’s version') { puts 'Sword ' + VERSION; exit }
   end.parse!
   Application.run!(@options)
