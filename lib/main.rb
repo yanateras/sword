@@ -1,5 +1,6 @@
 module Sword
   require 'rubygems'
+  require 'compass'
   require 'sinatra/base'
   require 'yaml'
 
@@ -114,11 +115,11 @@ module Sword
             debug "Fail\n"
           end
         end
+      end
 
-        if defined? Compass
-          Compass.add_project_configuration "#{LIBRARY}/style.rb"
-          @compass = Compass.sass_engine_options
-        end
+      def load_compass
+        Compass.add_project_configuration "#{LIBRARY}/style.rb" unless defined? Compass
+        Compass.sass_engine_options
       end
     end
 
@@ -144,7 +145,7 @@ module Sword
       call env.merge 'PATH_INFO' => '/index'
     end
 
-    parse 'styles', '/*.css', (@compass || {})
+    parse 'styles', '/*.css', load_compass
     parse 'scripts', '/*.js'
 
     get %r{(.+?)\.(#{PARSING['html'] * '|'})} do |route, _|
