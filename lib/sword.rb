@@ -8,15 +8,17 @@ module Sword
   PARSE    = YAML.load_file "#{LIBRARY}/parse.yml"
   VERSION  = '0.8.7'
 
+  class Misc; class << self
+    def windows?
+      RUBY_PLATFORM =~ /mswin|mingw|cygwin/
+    end
+  end end
+
   class Application < Sinatra::Base
     NotFound = Class.new StandardError
     class << self
       # Sinatra-related
       public
-
-      def windows?
-        RUBY_PLATFORM =~ /mswin|mingw|cygwin/
-      end
 
       def run!(options = {})
         # This piece of code is from Sinatra,
@@ -59,7 +61,7 @@ module Sword
 
       def silent_webrick
         return {} if @debug or not defined? WEBrick
-        return {:AccessLog => [], :Logger => WEBrick::Log::new('NUL', 7)} if windows?
+        return {:AccessLog => [], :Logger => WEBrick::Log::new('NUL', 7)} if Misc.windows?
         {:AccessLog => [], :Logger => WEBrick::Log::new('/dev/null', 7)}
       end
 
@@ -106,7 +108,7 @@ module Sword
         debug "Loading gems:\n", ' '
         list = PARSE['gems']
 
-        unless windows?
+        unless Misc.windows?
           list.concat File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []
           list << 'therubyracer'
         end
@@ -149,7 +151,7 @@ module Sword
           def font(options) end
           
           def jquery(version = '1.8.3')
-            "<script src='//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js'/>"
+            "<script src='//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js'></script>"
           end
 
           # Fotorama
