@@ -13,7 +13,7 @@ module Sword
     o.on('-d', '--dir <name>', 'Specify watch directory') { |name| options[:directory] = name }
     o.on('-g', '--gem <name>', 'Add a gem to require') { |name| open(REQUIRED, 'a') { |f| f.puts name }; puts "`#{g}` will be loaded next time you run Sword."; exit } unless defined? Ocra
     o.on('-h', '--help', 'Print this message') { puts o; exit }
-    o.on('-i', '--install', 'Try to install must-have gems') { exec 'gem install ' + PARSE[:gems].map { |n| n.respond_to?(:first) ? n.first : n } * ' '; exit } unless defined? Ocra
+    o.on('-i', '--install', 'Try to install must-have gems') { exec 'gem install ' + PARSE[:gems].map { |n| n.respond_to?(:first) ? n.first : n }.delete_if { |g| g['/'] } * ' '; exit } unless defined? Ocra
     o.on('-m', '--manual <x,y>', 'Specify gems to require') { |gems| gems.each { |g| require g }; options[:unload] = true }
     #o.on('-o', '--out <file>', 'Specify log file') { |file| options[:out] = file }
     o.on('-p', '--port <num>', 'Change the port, 1111 by default') { |num| options[:port] = num }
