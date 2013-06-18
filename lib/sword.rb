@@ -6,7 +6,7 @@ module Sword
   REQUIRED = Dir.home + '/.sword'
   LIBRARY  = File.dirname __FILE__
   PARSE    = YAML.load_file "#{LIBRARY}/parse.yml"
-  VERSION  = '0.8.3'
+  VERSION  = '0.8.5'
 
   class Application < Sinatra::Base
     # This piece of code is from Sinatra,
@@ -37,27 +37,26 @@ module Sword
       def run!(options = {})
         options = {:debug => false, :directory => Dir.pwd, :port => 1111, :silent => false}.merge(options)
         @debug, @silent = options[:debug], options[:silent]
+
         load unless options[:unload]
         init
 
         server_settings = settings.respond_to?(:server_settings) ? settings.server_settings : {}
-        detect_rack_handler.run self, server_settings.
-          merge(:Port => options[:port], :Host => bind).
-          merge( defined?(WEBrick) && !(@debug) ? {:AccessLog => [], :Logger => WEBrick::Log::new("/dev/null", 7)} : {} ) do |server|
-            [:INT, :TERM].each { |s| trap(s) { quit!(server) } }
-            print ">> Sword #{VERSION} at your service!\n" \
-            "   http://localhost:#{options[:port]} to see your project.\n" \
-            "   CTRL+C to stop.\n"
-            debug options.map { |k,v| "## #{k.capitalize}: #{v}\n" }.inject { |sum, n| sum + n }
-            unless @debug
-              server.silent = true if server.respond_to? :silent
-              disable :show_exceptions
-            end
-            set :views, options[:directory] # Structure-agnostic
-            set :public_folder, settings.views
-            server.threaded = settings.threaded if server.respond_to? :threaded
-            set :running, true
-            yield server if block_given?
+        detect_rack_handler.run self, server_settings.merge(:Port => options[:port], :Host => bind).merge(silent_webrick) do |server|
+          [:INT, :TERM].each { |s| trap(s) { quit!(server) } }
+          print ">> Sword #{VERSION} at your service!\n" \
+          "   http://localhost:#{options[:port]} to see your project.\n" \
+          "   CTRL+C to stop.\n"
+          debug options.map { |k,v| "## #{k.capitalize}: #{v}\n" }.inject { |sum, n| sum + n }
+          unless @debug
+            server.silent = true if server.respond_to? :silent
+            disable :show_exceptions
+          end
+          set :views, options[:directory] # Structure-agnostic
+          set :public_folder, settings.views
+          server.threaded = settings.threaded if server.respond_to? :threaded
+          set :running, true
+          yield server if block_given?
         end
       rescue Errno::EADDRINUSE, RuntimeError
         print "!! Port is in use. Is Sword already running?\n"
@@ -68,6 +67,11 @@ module Sword
         server.respond_to?(:stop!) ? server.stop! : server.stop
       end
 
+      def silent_webrick
+        return {} if @debug or not defined? WEBrick
+        return {:AccessLog => [], :Logger => WEBrick::Log::new('NUL', 7)} if RUBY_PLATFORM =~ /mswin|mingw|cygwin/
+        {:AccessLog => [], :Logger => WEBrick::Log::new('/dev/null', 7)}
+      end
 
       # Sword-specific
 
@@ -91,7 +95,14 @@ module Sword
 
       def load
         debug "Loading gems:\n", ' '
-        PARSE['gems'].concat(File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []).each do |lib|
+        list = PARSE['gems']
+
+        unless defined? Ocra
+          list.concat File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []
+          list << 'therubyracer'
+        end
+
+        list.each do |lib|
           # Hash case (a lot of variants)
           Hash === lib ?
           lib.values.first.each do |variant|

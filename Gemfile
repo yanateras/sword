@@ -1,4 +1,18 @@
+# This Gemfile is used for testing via Travis CI and
+# compiling Windows version using OCRA:
 source 'https://rubygems.org'
 
-# Testing via Travis CI
-%w[sinatra rake slim haml compass].each { |g| gem g }
+gem 'sinatra'
+gem 'rake'
+
+gem 'slim'
+gem 'haml'
+gem 'compass'
+
+gem 'coffee-script'
+gem 'less'
+
+gem 'kramdown'
+gem 'RedCloth'
+gem 'markaby'
+gem 'creole'
