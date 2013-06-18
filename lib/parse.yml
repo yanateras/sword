@@ -8,6 +8,8 @@ gems:
 - redcloth
 - markaby
 - creole
+- stylus
+- stylus/tilt
 - therubyracer
 - coffee-script
 - sass:
@@ -49,6 +51,8 @@ styles:
 - sass
 - scss
 - less
+- stylus:
+  - styl
 
 scripts:
 - coffee

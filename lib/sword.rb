@@ -6,35 +6,19 @@ module Sword
   REQUIRED = Dir.home + '/.sword'
   LIBRARY  = File.dirname __FILE__
   PARSE    = YAML.load_file "#{LIBRARY}/parse.yml"
-  VERSION  = '0.8.5'
+  VERSION  = '0.8.6'
 
   class Application < Sinatra::Base
-    # This piece of code is from Sinatra,
-    # tweaked a bit to silent Thin server
-    # and add Sword version and &c.
     NotFound = Class.new StandardError
     class << self
-      # Input/output
-
-      def puts(*args)
-        STDERR.puts(*args) unless @silent
-      end
-
-      def print(*args)
-        STDERR.print(*args) unless @silent
-      end
-
-      def debug(message, symbol = false)
-        if @debug
-          return print symbol * 2 + ' ' + message if symbol
-          print message
-        end
-      end
-
-
       # Sinatra-related
+      public
 
       def run!(options = {})
+        # This piece of code is from Sinatra,
+        # tweaked a bit to silent webserver
+        # and add Sword version and &c.
+        
         options = {:debug => false, :directory => Dir.pwd, :port => 1111, :silent => false}.merge(options)
         @debug, @silent = options[:debug], options[:silent]
 
@@ -62,6 +46,8 @@ module Sword
         print "!! Port is in use. Is Sword already running?\n"
       end
 
+      private
+
       def quit!(server)
         print "\n"
         server.respond_to?(:stop!) ? server.stop! : server.stop
@@ -72,6 +58,25 @@ module Sword
         return {:AccessLog => [], :Logger => WEBrick::Log::new('NUL', 7)} if RUBY_PLATFORM =~ /mswin|mingw|cygwin/
         {:AccessLog => [], :Logger => WEBrick::Log::new('/dev/null', 7)}
       end
+
+
+      # Input/output
+
+      def puts(*args)
+        STDERR.puts(*args) unless @silent
+      end
+
+      def print(*args)
+        STDERR.print(*args) unless @silent
+      end
+
+      def debug(message, symbol = false)
+        if @debug
+          return print symbol * 2 + ' ' + message if symbol
+          print message
+        end
+      end
+
 
       # Sword-specific
 

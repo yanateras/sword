@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.email = 'somu@so.mu'
   s.homepage = 'http://github.com/somu/sword'
 
-  s.files = `git ls-files`.split("\n") - %w[.gitignore .travis.yml sword.sublime-project]
+  s.files = `git ls-files`.split("\n") - %w[.gitignore .travis.yml sword.sublime-project sword.exe compile.bat icon.ico]
   s.executables = `git ls-files -- bin/*`.split("\n").map { |f| File.basename f }
   s.require_paths = %w[lib]
 

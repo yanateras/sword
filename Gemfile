@@ -10,7 +10,8 @@ gem 'haml'
 gem 'compass'
 
 gem 'coffee-script'
-gem 'less'
+gem 'stylus'
+# gem 'less'
 
 gem 'kramdown'
 gem 'RedCloth'
