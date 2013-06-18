@@ -6,13 +6,17 @@ module Sword
   REQUIRED = Dir.home + '/.sword'
   LIBRARY  = File.dirname __FILE__
   PARSE    = YAML.load_file "#{LIBRARY}/parse.yml"
-  VERSION  = '0.8.6'
+  VERSION  = '0.8.7'
 
   class Application < Sinatra::Base
     NotFound = Class.new StandardError
     class << self
       # Sinatra-related
       public
+
+      def windows?
+        RUBY_PLATFORM =~ /mswin|mingw|cygwin/
+      end
 
       def run!(options = {})
         # This piece of code is from Sinatra,
@@ -55,7 +59,7 @@ module Sword
 
       def silent_webrick
         return {} if @debug or not defined? WEBrick
-        return {:AccessLog => [], :Logger => WEBrick::Log::new('NUL', 7)} if RUBY_PLATFORM =~ /mswin|mingw|cygwin/
+        return {:AccessLog => [], :Logger => WEBrick::Log::new('NUL', 7)} if windows?
         {:AccessLog => [], :Logger => WEBrick::Log::new('/dev/null', 7)}
       end
 
@@ -102,7 +106,7 @@ module Sword
         debug "Loading gems:\n", ' '
         list = PARSE['gems']
 
-        unless defined? Ocra
+        unless windows?
           list.concat File.exists?(REQUIRED) ? File.read(REQUIRED).split("\n") : []
           list << 'therubyracer'
         end
@@ -164,7 +168,6 @@ module Sword
 
         error do
           @error = env['sinatra.error']
-          @ocra = defined? Ocra
           erb :error, :views => LIBRARY
         end
 
