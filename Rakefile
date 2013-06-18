@@ -1,12 +1,11 @@
 task :default => [:test]
 
 task :test do
-  %w[/lib /test].each { |dir| $:.unshift File.dirname(__FILE__) + dir }
   require 'minitest/spec'
   require 'minitest/autorun'
-  require 'main'
-  
-  Dir['./test/*.rb'].each { |t| require t[/[^\/]+(?=\.)/] }
+
+  require './lib/sword'
+  Dir['./test/*.rb'].each { |t| require t.chomp '.rb' }
 end
 
 task :make do
