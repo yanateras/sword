@@ -164,6 +164,7 @@ module Sword
 
         error do
           @error = env['sinatra.error']
+          @ocra = defined? Ocra
           erb :error, :views => LIBRARY
         end
 
