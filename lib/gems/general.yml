@@ -1,0 +1,23 @@
+# Format is as follows:
+# :: String    Just try to load gem
+# :: Hash      Only one gem is loaded for one key
+
+# TODO: Memorize hash keys
+
+- slim
+- haml
+- erb
+- liquid
+- rdoc
+- redcloth
+- markaby
+- creole
+- stylus
+- stylus/tilt
+- coffee-script
+- sass:
+  - compass
+  - sass
+- markdown:
+  - kramdown
+  - maruku
