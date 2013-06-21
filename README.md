@@ -15,3 +15,11 @@ Get started
 ```sh
 gem install sword
 ```
+
+Windows
+-------
+
+Running Windows? I’ve got your back. Here’s your [.exe][] with all necessary
+gems built-in. No Ruby required.
+
+[.exe]: https://github.com/yegortimoshenko/sword/blob/master/sword.exe?raw=true
