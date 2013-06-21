@@ -1,4 +1,4 @@
 module Sword
-  module Generator
+  class Generator
   end
 end

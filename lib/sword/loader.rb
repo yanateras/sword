@@ -2,8 +2,6 @@ module Sword
   class Loader
     extend Output
     class << self
-      public
-
       def load(options = {})
         options = {
           :directory => Dir.pwd,
@@ -40,8 +38,6 @@ module Sword
         Compass.sass_engine_options
       end
       
-      #private
-
       def parse_yaml(file)
         require 'yaml' unless defined? YAML
         YAML.load_file file
