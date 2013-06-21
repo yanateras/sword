@@ -3,7 +3,7 @@ module Sword
   require 'sinatra/base'
 
   class Application < Sinatra::Base
-    NotFound = Class.new StandardError
+    NotFoundError = Class.new StandardError
     extend Output
 
     class << self
@@ -36,8 +36,6 @@ module Sword
         print "!! Port is in use. Is Sword already running?\n"
       end
 
-      # private
-
       # Generate instance variables containing parsed versions of YAML engine lists.
       # Variable names are identical to file names.
       # Format is as follows:
@@ -58,8 +56,8 @@ module Sword
       # @param route [String] ordinary route pattern (should be like `/*.css`)
       # @param options [Hash] hash of options to give to the found template engine
       # @param &block [Block] block to run if nothing is found
-      # @raise [NotFound] if no template engine was found and block was not specified
-      # @yield `*` from the route pattern
+      # @raise [NotFoundError] if no template engine was found and block was not specified
+      # @yield '*' from the route pattern
       def parse(list, route, options = {}, &block)
         self.get route do |name|
           list.each do |language|
@@ -69,7 +67,7 @@ module Sword
               end
             end
           end
-          block_given? ? yield(name) : raise(NotFound)
+          block_given? ? yield(name) : raise(NotFoundError)
         end
       end
 
