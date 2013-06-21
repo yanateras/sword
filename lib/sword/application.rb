@@ -38,15 +38,17 @@ module Sword
 
       # Generate instance variables containing parsed versions of YAML engine lists.
       # Variable names are identical to file names.
-      # Format is as follows:
-      # + [String] is both engine method and the only extension,
-      # + [Hash] is the key is an engine method and the value is an array of extensions
-      # 
-      # @param [Array, String] absolute path to the engine list
+      # @param engines [Array, String] absolute path(s) to engine lists
+      # @return self
+      # @note
+      #   Format is as follows:
+      #   string is both engine method and the only extension,
+      #   hash is the key is an engine method and the value is an array of extensions
       def initialize_engines(engines)
         Array(engines).each do |file|
           self.instance_variable_set '@' + file.basename(file, '.yml'), Loader.parse_engine(file)
         end
+        self
       end
 
 
