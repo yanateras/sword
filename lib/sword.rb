@@ -1,4 +1,5 @@
 module Sword
+  # Gem directory
   LIBRARY  = File.dirname __FILE__
   $:.unshift LIBRARY
 

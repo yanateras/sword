@@ -36,10 +36,17 @@ module Sword
         print "!! Port is in use. Is Sword already running?\n"
       end
 
-      private
+      # private
 
+      # Generate instance variables containing parsed versions of YAML engine lists.
+      # Variable names are identical to file names.
+      # Format is as follows:
+      # + [String] is both engine method and the only extension,
+      # + [Hash] is the key is an engine method and the value is an array of extensions
+      # 
+      # @param [Array, String] absolute path to the engine list
       def initialize_engines(engines)
-        Dir[engines].each do |file|
+        Array(engines).each do |file|
           self.instance_variable_set '@' + file.basename(file, '.yml'), Loader.parse_engine(file)
         end
       end
@@ -50,7 +57,9 @@ module Sword
       # @param list [String] instance variable containing engine list from `/engines` folder
       # @param route [String] ordinary route pattern (should be like `/*.css`)
       # @param options [Hash] hash of options to give to the found template engine
-      # @param &block [Block] block to run if nothing is found (yields `*` from pattern)
+      # @param &block [Block] block to run if nothing is found
+      # @raise [NotFound] if no template engine was found and block was not specified
+      # @yield `*` from the route pattern
       def parse(list, route, options = {}, &block)
         self.get route do |name|
           list.each do |language|
@@ -64,16 +73,24 @@ module Sword
         end
       end
 
+      # Specifies the application working directory
+      #
+      # @param [String] directory absolute path
       def specify_directory(directory)
         set :views, directory # Structure-agnostic        
         set :public_folder, settings.views
       end
 
+      # Stops the server (stolen from original Sinatra)
+      # 
       def quit!(server)
         print "\n"
         server.respond_to?(:stop!) ? server.stop! : server.stop
       end
 
+      # Silents WEBrick server (platform-specific)
+      #
+      # @return [Hash] hash with settings required to silent him
       def silent_webrick
         return {} if @debug or not defined? WEBrick
         null = Windows::PLATFORM ? 'NUL' : '/dev/null'

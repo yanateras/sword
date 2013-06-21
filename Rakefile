@@ -1,6 +1,7 @@
 task :default => [:test]
 
 task :test do
+  require 'rubygems'
   require 'minitest/spec'
   require 'minitest/autorun'
 

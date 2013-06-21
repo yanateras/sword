@@ -9,12 +9,11 @@ Gem::Specification.new do |s|
   s.executables = `git ls-files -- bin/*`.split("\n").map { |f| File.basename f }
 
   s.date = Date.today.to_s
+
   s.authors = 'George'
   s.email = 'somu@so.mu'
   s.homepage = 'http://github.com/somu/sword'
 
-  s.files = `git ls-files`.split("\n") - %w[.gitignore .travis.yml sword.sublime-project sword.exe compile.bat icon.ico]
-  s.executables = `git ls-files -- bin/*`.split("\n").map { |f| File.basename f }
   s.require_paths = %w[lib]
 
   s.add_dependency 'sinatra', '>= 1.3.2'

@@ -40,7 +40,7 @@ module Sword
         Compass.sass_engine_options
       end
       
-      private
+      #private
 
       def parse_yaml(file)
         require 'yaml' unless defined? YAML

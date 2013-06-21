@@ -1,1 +1,4 @@
-module Sword end
+module Sword
+  module Generator
+  end
+end
