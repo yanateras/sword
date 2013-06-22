@@ -39,7 +39,7 @@ module Sword
       # Generate instance variables containing parsed versions of YAML engine lists.
       # Variable names are identical to file names.
       # @param engines [Array, String] absolute path(s) to engine lists
-      # @return self
+      # @return [Sword::Application] self
       # @note
       #   Format is as follows:
       #   string is both engine method and the only extension,
@@ -99,5 +99,6 @@ module Sword
     end
 
     helpers { include Helpers }
+    include Routes
   end
 end

@@ -1,5 +1,5 @@
 module Sword
-  class Application
+  module Routes
     HTML = %w[html htm xhtml xht dhtml dhtm]
 
     error do

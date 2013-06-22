@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 module Sword
-  require File.dirname(__FILE__) + '/../lib/sword'
+  require './' + File.dirname(__FILE__) + '/../lib/sword'
   require 'optparse'
   options = {}
 
