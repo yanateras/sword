@@ -1,34 +1,5 @@
 #!/usr/bin/env ruby
-# encoding: utf-8
+$:.unshift File.dirname(__FILE__) + '/../lib'
 
-module Sword
-  require './' + File.dirname(__FILE__) + '/../lib/sword'
-  require 'optparse'
-  options = {}
-
-  usage = OptionParser.new do |o|
-    o.summary_width = 18
-    #o.on('-b', '--build <file>', 'Build project into zip/folder') { Application.export!(options) }
-    o.on('-c', '--compress', 'Compress assets') { options[:compress] = true }
-    o.on('--debug', 'Show server’s guts') { options[:debug] = true }
-    o.on('-d', '--dir <name>', 'Specify watch directory') { |name| options[:directory] = name }
-    o.on('-e', '--error <page>', 'Specify error page')
-    o.on('-f', '--favicon <i>', 'Specify favicon')
-    unless Windows::PLATFORM
-      o.on('-g', '--gem <name>', 'Add a gem to require') { |name| Loader.add_to_load(name); exit }
-      o.on('-h', '--help', 'Print this message') { puts o; exit }
-      o.on('-i', '--install', 'Try to install must-have gems') { Loader.install_gems; exit }
-      o.on('-l', '--load <file>', 'Load gems from specified file') { |file| Loader.load_file = file }
-    end
-    o.on('-m', '--manual <x,y>', 'Specify gems to require') { |gems| gems.each { |g| require g }; options[:unload] = true }
-    #o.on('-o', '--out <file>', 'Specify log file') { |file| options[:out] = file }
-    o.on('-p', '--port <num>', 'Change the port, 1111 by default') { |num| options[:port] = num }
-    o.on('--settings <file>', 'Load settings from file') { |file| Loader.settings_file = file }
-    o.on('-s', '--silent', 'Try to turn off any messages') { options[:silent] = true }
-    o.on('-u', '--unload', 'Skip heuristically loading gems') { options[:unload] = true }
-    o.on('-v', '--version', 'Print Sword’s version') { puts 'Sword ' + VERSION; exit }
-  end
-
-  usage.parse!(Windows::PLATFORM && ARGV.empty? ? Windows.get_options(usage) : ARGV)
-  #Loader.load(options)
-end
+require 'sword/cli'
+Sword::CLI.new.run
