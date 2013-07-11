@@ -1,10 +1,10 @@
-module Sword
-  require 'rubygems'
-  require 'sinatra/base'
+require 'rubygems'
+require 'sinatra/base'
 
+module Sword
   class Application < Sinatra::Base
     NotFoundError = Class.new StandardError
-    extend Output
+    extend Output if defined? Output
 
     class << self
       public

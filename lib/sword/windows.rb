@@ -12,6 +12,6 @@ module Sword
     end
 
     # Check if we’re running Windows there:
-    PLATFORM = RUBY_PLATFORM =~ /mswin|windows|win32|mingw|cygwin/
+    WINDOWS = RUBY_PLATFORM =~ /mswin|windows|win32|mingw|cygwin/
   end
 end

@@ -1,5 +1,6 @@
 module Sword
   module Helpers
+    # @todo Google fonts helper
     def font(options) end
     
     def jquery(version = '1.8.3')
