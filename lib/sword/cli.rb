@@ -6,21 +6,25 @@ module Sword
   # @api private
   class CLI
     def initialize(width = 18, &block)
-      @parser = OptionParser.new do |o|
-        o.summary_width = width
-        set_options(o)
+      @options = {}
+      @parser = OptionParser.new do |parser|
+        parser.summary_width = width
+        set_options(parser)
         if block_given?
-          o.separator 'Plugin options:'
-          yield o
+          parser.separator 'Plugin options:'
+          yield parser
         end
       end
     end
 
+    attr_reader :options
+
     def run(arguments = ARGV)
-      @parser.parse!(arguments.dup)
+      run!(arguments.dup)
     end
 
     def run!(arguments = ARGV)
+      @options = {}
       @parser.parse!(arguments)
     end
 
@@ -48,7 +52,7 @@ module Sword
 
     def set_dir(parser)
       parser.on '-d', '--dir <name>', 'Specify watch directory' do |name|
-        options[:directory] = name
+        @options[:directory] = name
       end
     end
 
@@ -60,7 +64,7 @@ module Sword
 
     def set_favicon(parser)
       parser.on '-f', '--favicon <i>', 'Specify favicon' do |icon|
-        options[:favicon] = icon
+        @options[:favicon] = icon
       end
     end
 
@@ -94,36 +98,37 @@ module Sword
     def set_manual(parser)
       parser.on '-m', '--manual <x,y>', 'Specify gems to require' do |gems|
         gems.each { |g| require g }
-        options[:unload] = true
+        @options[:unload] = true
       end
     end
 
     def set_port(parser)
       parser.on '-p', '--port <num>', 'Change the port, 1111 by default' do |num|
-        options[:port] = num
+        @options[:port] = num
       end
     end
 
     def set_settings(parser)
-      parser.on '-S', '--settings <file>', 'Load settings from file' do |file|
+      parser.on '-S', '--settings <f>', 'Load settings from file' do |file|
         Loader.settings_file = file
       end
     end
 
     def set_silent(parser)
       parser.on '-s', '--silent', 'Try to turn off any messages' do
-        options[:silent] = true
+        @options[:silent] = true
       end
     end
 
     def set_unload(parser)
       parser.on '-u', '--unload', 'Skip heuristically loading gems' do
-        options[:unload] = true
+        @options[:unload] = true
       end
     end
 
     def set_version(parser)
       parser.on '-v', '--version', 'Print Sword’s version' do
+        require 'sword/version'
         puts 'Sword ' + VERSION
         exit
       end

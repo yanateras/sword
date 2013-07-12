@@ -2,4 +2,4 @@
 $:.unshift File.dirname(__FILE__) + '/../lib'
 
 require 'sword/cli'
-Sword::CLI.new.run
+Sword::CLI.new.run!
