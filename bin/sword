@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 $:.unshift File.dirname(__FILE__) + '/../lib'
 
-require 'sword/cli'
-Sword::CLI.new.run!
+require 'sword/boot/cli'
+require 'sword/windows'
+Sword::Boot::CLI.new.run(Sword::WINDOWS ? false : ARGV)

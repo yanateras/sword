@@ -1,4 +1,4 @@
 module Sword
-  class Export
+  class Builder
   end
 end

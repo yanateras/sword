@@ -1,9 +1,7 @@
 module Sword
-  require 'sword/output'
-  require 'sword/windows'
-  require 'sword/loader'
   require 'sword/version'
-  require 'sword/helpers'
-  require 'sword/application'
-  require 'sword/routes'
+  require 'sword/logger'
+  require 'sword/core/application'
+  require 'sword/generator'
+  require 'sword/builder'
 end

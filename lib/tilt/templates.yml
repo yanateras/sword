@@ -1,0 +1,15 @@
+- haml
+- liquid
+- textile
+- rdoc
+- slim
+- markaby:
+  - mab
+- markdown:
+  - markdown
+  - mkd
+  - md
+- erb:
+  - erb
+  - rhtml
+  - erubis
